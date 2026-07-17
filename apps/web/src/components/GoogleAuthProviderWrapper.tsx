@@ -14,12 +14,14 @@ export default function GoogleAuthProviderWrapper({ children }: { children: Reac
 
   if (!mounted) return <>{children}</>;
   
-  if (!googleClientId) {
+  const activeClientId = googleClientId || "425063335581-2ubb3pr3lt6194r34nmbomcil3bio1h2.apps.googleusercontent.com";
+
+  if (!activeClientId) {
     return <>{children}</>;
   }
 
   return (
-    <GoogleOAuthProvider clientId={googleClientId}>
+    <GoogleOAuthProvider clientId={activeClientId}>
       {children}
     </GoogleOAuthProvider>
   );

@@ -16,7 +16,7 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       passkey: null,
       isLocked: false,
-      googleClientId: null,
+      googleClientId: "425063335581-2ubb3pr3lt6194r34nmbomcil3bio1h2.apps.googleusercontent.com",
       setPasskey: (key) => set({ passkey: key, isLocked: key ? true : false }),
       unlock: (key) => {
         const { passkey } = get();

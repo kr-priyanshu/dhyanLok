@@ -105,7 +105,8 @@ export default function Notebook() {
         await idbSet(`audio_${selectedDateStr}`, audioBlob);
         setLocalAudioURL(URL.createObjectURL(audioBlob));
         
-        if (googleClientId) {
+        const activeClientId = googleClientId || "425063335581-2ubb3pr3lt6194r34nmbomcil3bio1h2.apps.googleusercontent.com";
+        if (activeClientId) {
           loginAndUpload();
         }
       };
