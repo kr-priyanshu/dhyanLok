@@ -1,0 +1,367 @@
+"use client";
+
+import React, { useState, useEffect, useRef } from "react";
+import { useHabitStore } from "@/store/useHabitStore";
+import { useAuthStore } from "@/store/useAuthStore";
+import { format, subDays, isSameDay } from "date-fns";
+import { Book, ChevronLeft, ChevronRight, Mic, Square, Loader2, Play, CloudUpload } from "lucide-react";
+import { useGoogleLogin } from "@react-oauth/google";
+import { get, set as idbSet } from "idb-keyval";
+
+export default function Notebook() {
+  const { habits, logs, journals, audioFiles, setJournal, toggleLog, setAudioFile } = useHabitStore();
+  const { googleClientId } = useAuthStore();
+  
+  const [selectedDateObj, setSelectedDateObj] = useState(new Date());
+  const [isJournalOpen, setIsJournalOpen] = useState(false);
+  const [offsetDays, setOffsetDays] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const selectedDateStr = format(selectedDateObj, 'yyyy-MM-dd');
+  
+  // Audio & Dictation State
+  const [isRecording, setIsRecording] = useState(false);
+  const [isDictating, setIsDictating] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [localAudioURL, setLocalAudioURL] = useState<string | null>(null);
+  
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const recognitionRef = useRef<any>(null);
+
+  useEffect(() => { setMounted(true); }, []);
+  
+  // Load local audio when selecting a new date
+  useEffect(() => {
+    if (!mounted) return;
+    const loadLocalAudio = async () => {
+      try {
+        const blob = await get(`audio_${selectedDateStr}`);
+        if (blob) {
+          setLocalAudioURL(URL.createObjectURL(blob));
+        } else {
+          setLocalAudioURL(null);
+        }
+      } catch (e) {
+        console.error("IDB read error", e);
+      }
+    };
+    loadLocalAudio();
+  }, [selectedDateStr, mounted]);
+
+  const uploadToDrive = async (blob: Blob, accessToken: string) => {
+    setUploading(true);
+    try {
+      const metadata = {
+        name: `DhyanLok_Journal_${selectedDateStr}.webm`,
+        mimeType: 'audio/webm',
+      };
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('file', blob);
+
+      const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: form
+      });
+      const data = await res.json();
+      if (data.id) {
+        setAudioFile(selectedDateStr, data.id);
+        alert("Audio saved to Google Drive!");
+      }
+    } catch (e) {
+      console.error("Upload failed", e);
+      alert("Failed to upload to Google Drive");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const loginAndUpload = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      if (audioChunksRef.current.length > 0) {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await uploadToDrive(audioBlob, tokenResponse.access_token);
+      }
+    },
+    scope: 'https://www.googleapis.com/auth/drive.file',
+  });
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        await idbSet(`audio_${selectedDateStr}`, audioBlob);
+        setLocalAudioURL(URL.createObjectURL(audioBlob));
+        
+        if (googleClientId) {
+          loginAndUpload();
+        }
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        
+        let finalTranscript = journals[selectedDateStr] || "";
+        // Pre-append a newline if there's already text
+        if (finalTranscript.trim().length > 0) finalTranscript += "\n\n";
+        
+        recognition.onresult = (e: any) => {
+          let currentFinal = finalTranscript;
+          for (let i = e.resultIndex; i < e.results.length; i++) {
+            if (e.results[i].isFinal) {
+              finalTranscript += e.results[i][0].transcript + " ";
+              currentFinal = finalTranscript;
+            } else {
+               // Append interim result for real-time feel
+               currentFinal += e.results[i][0].transcript;
+            }
+          }
+          setJournal(selectedDateStr, currentFinal);
+        };
+        
+        recognitionRef.current = recognition;
+        recognition.start();
+        setIsDictating(true);
+      }
+    } catch (err) {
+      console.error("Mic access denied or error", err);
+      alert("Could not access microphone.");
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream.getTracks().forEach(t => t.stop());
+      setIsRecording(false);
+    }
+    if (recognitionRef.current && isDictating) {
+      recognitionRef.current.stop();
+      setIsDictating(false);
+    }
+  };
+
+  if (!mounted) return null;
+
+  const days = Array.from({ length: 15 }).map((_, i) => subDays(new Date(), offsetDays + i));
+  const groupedMonths: { month: number; name: string; count: number }[] = [];
+  days.forEach(day => {
+    const month = day.getMonth();
+    const lastGroup = groupedMonths[groupedMonths.length - 1];
+    if (lastGroup && lastGroup.month === month) {
+      lastGroup.count += 1;
+    } else {
+      groupedMonths.push({ month, name: format(day, 'MMMM'), count: 1 });
+    }
+  });
+
+  return (
+    <div className="flex flex-col mt-12 animate-in fade-in duration-700">
+      <header className="mb-16 border-b border-premium-border pb-8">
+        <h1 className="text-5xl md:text-7xl font-heading tracking-tighter mb-4 text-premium-text leading-none">Notebook</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <p className="text-premium-muted font-sans text-sm tracking-widest uppercase">
+            {offsetDays === 0 ? "Last 15 Days" : `Days ${offsetDays + 1} - ${offsetDays + 15} ago`}
+          </p>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setOffsetDays(d => Math.max(0, d - 15))}
+              disabled={offsetDays === 0}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-premium-border text-premium-muted hover:text-premium-text hover:border-premium-text transition-colors text-xs uppercase tracking-widest disabled:opacity-30 disabled:pointer-events-none"
+            >
+              <ChevronLeft size={14} /> Newer
+            </button>
+            <button 
+              onClick={() => setOffsetDays(d => d + 15)}
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full border border-premium-border text-premium-muted hover:text-premium-text hover:border-premium-text transition-colors text-xs uppercase tracking-widest"
+            >
+              Older <ChevronRight size={14} />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <div className="overflow-x-auto pb-8 mb-12">
+        <div className="inline-grid gap-3" style={{ gridTemplateColumns: `auto repeat(15, minmax(2rem, 1fr))` }}>
+          
+          <div className="sticky left-0 bg-[var(--theme-bg)] z-20 pr-4"></div>
+          {groupedMonths.map((group, i) => {
+            const isEvenMonth = group.month % 2 === 0;
+            return (
+              <div 
+                key={`month-${i}`} 
+                style={{ gridColumn: `span ${group.count}` }}
+                className={`text-xs font-heading text-center rounded-t-lg pt-1 pb-1 uppercase tracking-widest ${
+                  isEvenMonth ? 'bg-premium-text text-[var(--theme-bg)] font-bold' : 'bg-transparent text-premium-text'
+                }`}
+              >
+                {group.name}
+              </div>
+            );
+          })}
+
+          <div className="sticky left-0 bg-[var(--theme-bg)] z-20 pr-4"></div>
+          {days.map((day, i) => {
+            const isSelected = isSameDay(day, selectedDateObj);
+            const isEvenMonth = day.getMonth() % 2 === 0;
+            
+            return (
+              <button 
+                key={i} 
+                onClick={() => setSelectedDateObj(day)}
+                className={`text-xs font-mono text-center flex flex-col justify-end pb-2 rounded-b-lg cursor-pointer transition-colors ${
+                  isEvenMonth ? 'bg-premium-text text-[var(--theme-bg)]' : 'text-premium-muted hover:text-premium-text'
+                } ${isSelected && !isEvenMonth ? 'text-premium-text font-bold bg-premium-panel' : ''}`}
+              >
+                <span className="opacity-50">{format(day, 'E')[0]}</span>
+                <span>{format(day, 'd')}</span>
+              </button>
+            );
+          })}
+
+          {habits.map((habit) => (
+            <React.Fragment key={habit._id}>
+              <div className="sticky left-0 bg-[var(--theme-bg)] z-20 pr-4 flex items-center min-w-[150px]">
+                <span className="text-sm font-medium truncate text-premium-text tracking-tight">{habit.title}</span>
+              </div>
+              
+              {days.map((day, i) => {
+                const dayStr = format(day, 'yyyy-MM-dd');
+                const isCompleted = logs[`${dayStr}_${habit._id}`] === 'completed';
+                const isSelected = isSameDay(day, selectedDateObj);
+                const isEvenMonth = day.getMonth() % 2 === 0;
+
+                let cellStyle = '';
+                if (isEvenMonth) {
+                  if (isCompleted) {
+                     cellStyle = 'bg-premium-text border-premium-text';
+                  } else {
+                     cellStyle = 'border-premium-text/30 bg-premium-text/10 hover:border-premium-text/80';
+                  }
+                } else {
+                  if (isCompleted) {
+                     cellStyle = 'bg-[var(--theme-accent)] border-[var(--theme-accent)]';
+                  } else {
+                     cellStyle = 'border-premium-border bg-transparent hover:border-premium-muted';
+                  }
+                }
+
+                return (
+                  <button 
+                    key={i} 
+                    onClick={() => toggleLog(habit._id, dayStr)}
+                    className={`aspect-square rounded-[4px] border transition-all duration-300 cursor-pointer ${cellStyle} ${
+                      isSelected && !isCompleted ? 'ring-2 ring-[var(--theme-accent)] ring-offset-2 ring-offset-[var(--theme-bg)]' : ''
+                    }`}
+                  />
+                );
+              })}
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex justify-center mb-12">
+        <button 
+          onClick={() => setIsJournalOpen(true)}
+          className="glass-panel px-8 py-4 rounded-xl text-premium-text font-medium hover:border-premium-text transition-colors flex items-center gap-3 shadow-lg"
+        >
+          <Book size={18} />
+          Open Journal for {format(selectedDateObj, 'MMMM do')}
+        </button>
+      </div>
+
+      {isJournalOpen && (
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/40 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setIsJournalOpen(false)}>
+          <div 
+            className="glass-panel w-full max-w-2xl rounded-2xl shadow-2xl p-6 ring-1 ring-premium-border animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <header className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-sans tracking-tight text-premium-text flex items-center gap-3">
+                Daily Log
+                {isRecording && <span className="flex h-3 w-3 rounded-full bg-red-500 animate-pulse" />}
+              </h2>
+              <span className="text-premium-muted font-mono text-sm tracking-widest">{format(selectedDateObj, 'MMMM do, yyyy')}</span>
+            </header>
+            
+            <textarea 
+              autoFocus
+              placeholder={`Write or dictate your reflections for ${format(selectedDateObj, 'MMMM do')}...`}
+              value={journals[selectedDateStr] || ""}
+              onChange={(e) => setJournal(selectedDateStr, e.target.value)}
+              className="w-full bg-transparent border border-premium-border rounded-xl p-4 text-premium-text flex-1 outline-none focus:border-[var(--theme-accent)] transition-colors resize-none leading-relaxed min-h-[200px]"
+            />
+            
+            {/* Audio Elements */}
+            <div className="mt-4 flex flex-col gap-4">
+              {localAudioURL && (
+                <div className="flex items-center gap-4 bg-premium-panel p-3 rounded-xl border border-premium-border">
+                   <audio src={localAudioURL} controls className="flex-1 h-10" />
+                   {audioFiles[selectedDateStr] && (
+                     <div className="text-xs font-mono tracking-widest text-premium-muted flex items-center gap-2">
+                       <CloudUpload size={14} className="text-[var(--theme-accent)]" /> Synced
+                     </div>
+                   )}
+                </div>
+              )}
+
+              <div className="flex justify-between items-center">
+                 <div className="flex gap-2">
+                   {isRecording ? (
+                     <button 
+                       onClick={stopRecording}
+                       className="flex items-center gap-2 px-4 py-2 rounded-full border border-red-500 text-red-500 hover:bg-red-500 hover:text-black transition-colors uppercase tracking-widest text-xs font-medium"
+                     >
+                       <Square size={14} /> Stop Recording
+                     </button>
+                   ) : (
+                     <button 
+                       onClick={startRecording}
+                       className="flex items-center gap-2 px-4 py-2 rounded-full border border-[var(--theme-accent)] text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-black transition-colors uppercase tracking-widest text-xs font-medium"
+                     >
+                       <Mic size={14} /> Record & Dictate
+                     </button>
+                   )}
+                   
+                   {uploading && (
+                     <div className="flex items-center gap-2 text-xs font-mono text-premium-muted animate-pulse">
+                       <Loader2 size={14} className="animate-spin" /> Uploading to Drive...
+                     </div>
+                   )}
+                 </div>
+
+                 <button onClick={() => setIsJournalOpen(false)} className="px-6 py-2 bg-premium-text text-[var(--theme-bg)] font-medium rounded hover:opacity-80 transition-opacity">
+                   Save & Close
+                 </button>
+              </div>
+            </div>
+            
+          </div>
+        </div>
+      )}
+      
+      <p className="text-center text-xs text-premium-muted opacity-50 mt-12 font-sans tracking-wide">
+        Press <kbd className="font-mono bg-premium-panel text-premium-muted border border-premium-border px-2 py-1 rounded mx-1">Ctrl+K</kbd> to navigate
+      </p>
+    </div>
+  );
+}
