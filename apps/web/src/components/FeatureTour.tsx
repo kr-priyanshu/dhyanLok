@@ -202,7 +202,7 @@ export default function FeatureTour() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm pointer-events-auto transition-opacity"
+        className="absolute inset-0 pointer-events-auto transition-opacity"
         onClick={handleFinish}
       />
 
