@@ -17,7 +17,6 @@ export default function SettingsPanel() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const [newPasskey, setNewPasskey] = useState("");
   const [newClientId, setNewClientId] = useState(googleClientId || "");
   const [newGeminiKey, setNewGeminiKey] = useState(geminiApiKey || "");
 
