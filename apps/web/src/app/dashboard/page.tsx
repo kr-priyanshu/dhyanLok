@@ -10,8 +10,10 @@ import { format, subDays } from "date-fns";
 import { motion } from "framer-motion";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
 import AIAssistant from "@/components/AIAssistant";
-import ActivityHeatmap from "@/components/ActivityHeatmap";
-import CategoryRadar from "@/components/CategoryRadar";
+import dynamic from "next/dynamic";
+
+const ActivityHeatmap = dynamic(() => import("@/components/ActivityHeatmap"), { ssr: false, loading: () => <div className="h-64 animate-pulse bg-premium-panel rounded-xl"></div> });
+const CategoryRadar = dynamic(() => import("@/components/CategoryRadar"), { ssr: false, loading: () => <div className="h-64 animate-pulse bg-premium-panel rounded-xl"></div> });
 
 export default function Dashboard() {
   const { habits, logs, addHabit, removeHabit, toggleLog, reorderHabit } = useHabitStore();
