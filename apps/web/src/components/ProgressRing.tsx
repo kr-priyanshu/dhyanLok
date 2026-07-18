@@ -12,7 +12,13 @@ export default function ProgressRing({
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
   return (
-    <div className="relative flex items-center justify-center">
+    <div 
+      className="relative flex items-center justify-center" 
+      role="progressbar" 
+      aria-valuenow={Math.round(progress)} 
+      aria-valuemin={0} 
+      aria-valuemax={100}
+    >
       <svg height={radius * 2} width={radius * 2} className="rotate-[-90deg]">
         <circle
           className="text-premium-border"

@@ -1,20 +1,25 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useThemeStore } from "@/store/useThemeStore";
 import { useHabitStore } from "@/store/useHabitStore";
 import { useAuthStore } from "@/store/useAuthStore";
-import { Settings, X, Download, Upload, Lock, Cloud } from "lucide-react";
+import { supabase } from "@/utils/supabase";
+import { Settings, X, Download, Upload, Lock, Cloud, Sparkles, Users } from "lucide-react";
 
 export default function SettingsPanel() {
   const { bgColor, textColor, headingFont, accentColor, setTheme } = useThemeStore();
-  const { habits, logs, journals, restoreData } = useHabitStore();
-  const { passkey, setPasskey, googleClientId, setGoogleClientId } = useAuthStore();
+  const { habits, logs, journals, transcripts, audioFiles, restoreData } = useHabitStore();
+  const { role, passkey, setPasskey, googleClientId, setGoogleClientId, geminiApiKey, setGeminiApiKey, logout } = useAuthStore();
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   const [newPasskey, setNewPasskey] = useState("");
   const [newClientId, setNewClientId] = useState(googleClientId || "");
+  const [newGeminiKey, setNewGeminiKey] = useState(geminiApiKey || "");
 
   // Close on Escape key
   useEffect(() => {
@@ -34,7 +39,7 @@ export default function SettingsPanel() {
   ];
 
   const handleBackup = () => {
-    const data = { habits, logs, journals };
+    const data = { habits, logs, journals, transcripts, audioFiles };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -68,6 +73,7 @@ export default function SettingsPanel() {
   return (
     <>
       <button 
+        data-tour="settings"
         onClick={() => setIsOpen(true)}
         aria-label="Open appearance settings"
         className="fixed bottom-6 right-6 h-12 w-12 rounded-full glass-panel flex items-center justify-center text-[var(--theme-text)] opacity-40 hover:opacity-100 transition-opacity z-[150]"
@@ -86,7 +92,7 @@ export default function SettingsPanel() {
               </button>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-6 overflow-y-auto pb-24 pr-2 custom-scrollbar flex-1">
               <div className="space-y-2">
                 <label className="text-sm opacity-60">Background Color</label>
                 <div className="flex gap-4 items-center">
@@ -159,35 +165,15 @@ export default function SettingsPanel() {
                  >
                    Neon Terminal
                  </button>
+                 <button 
+                  onClick={() => setTheme({ bgColor: '#0a0a0a', textColor: '#ffffff', accentColor: '', headingFont: 'var(--font-creamy)' })}
+                  className="w-full py-2 border border-premium-border rounded text-xs text-premium-text bg-premium-panel hover:bg-premium-text hover:text-black transition-colors mt-2"
+                 >
+                   Reset to Defaults
+                 </button>
               </div>
 
-              <div className="pt-8 space-y-3">
-                 <h3 className="text-sm font-heading font-medium tracking-tight mb-4 flex items-center gap-2"><Lock size={16}/> Security</h3>
-                 {passkey ? (
-                   <button 
-                     onClick={() => setPasskey(null)}
-                     className="w-full py-2 border border-red-500/50 text-red-500 rounded text-xs opacity-70 hover:opacity-100 transition-opacity"
-                   >
-                     Remove Passkey
-                   </button>
-                 ) : (
-                   <div className="flex gap-2">
-                     <input 
-                       type="password"
-                       placeholder="Enter new passkey..."
-                       value={newPasskey}
-                       onChange={e => setNewPasskey(e.target.value)}
-                       className="flex-1 bg-transparent border border-premium-border rounded p-2 text-xs text-premium-text outline-none focus:border-premium-text"
-                     />
-                     <button 
-                       onClick={() => { if(newPasskey) { setPasskey(newPasskey); setNewPasskey(""); } }}
-                       className="px-3 bg-premium-text text-black rounded text-xs"
-                     >
-                       Set
-                     </button>
-                   </div>
-                 )}
-              </div>
+
 
               <div className="pt-4 space-y-3">
                  <h3 className="text-sm font-heading font-medium tracking-tight mb-4 flex items-center gap-2"><Cloud size={16}/> Google Drive Sync</h3>
@@ -200,10 +186,63 @@ export default function SettingsPanel() {
                      className="w-full bg-transparent border border-premium-border rounded p-2 text-xs text-premium-text outline-none focus:border-premium-text"
                    />
                    <button 
-                     onClick={() => setGoogleClientId(newClientId || null)}
+                     onClick={async () => {
+                       try {
+                         setGoogleClientId(newClientId || null);
+                         const email = useAuthStore.getState().registeredEmail;
+                         if (email) {
+                           const { error } = await supabase.from('guest_users').update({ google_client_id: newClientId || null }).eq('email', email);
+                           if (error) {
+                             alert("Failed to save to cloud: " + error.message);
+                           } else {
+                             alert("Saved successfully!");
+                           }
+                         } else {
+                           alert("No email found to sync with.");
+                         }
+                       } catch (err: any) {
+                         alert("Error: " + err.message);
+                       }
+                     }}
                      className="w-full py-2 border border-premium-border rounded text-xs opacity-70 hover:opacity-100 transition-opacity"
                    >
                      Save Client ID
+                   </button>
+                 </div>
+              </div>
+
+              <div className="pt-4 space-y-3">
+                 <h3 className="text-sm font-heading font-medium tracking-tight mb-4 flex items-center gap-2"><Sparkles size={16}/> Gemini AI</h3>
+                 <div className="flex flex-col gap-2">
+                   <input 
+                     type="password"
+                     placeholder="Gemini API Key..."
+                     value={newGeminiKey}
+                     onChange={e => setNewGeminiKey(e.target.value)}
+                     className="w-full bg-transparent border border-premium-border rounded p-2 text-xs text-premium-text outline-none focus:border-premium-text"
+                   />
+                   <button 
+                     onClick={async () => {
+                       try {
+                         setGeminiApiKey(newGeminiKey || null);
+                         const email = useAuthStore.getState().registeredEmail;
+                         if (email) {
+                           const { error } = await supabase.from('guest_users').update({ gemini_api_key: newGeminiKey || null }).eq('email', email);
+                           if (error) {
+                             alert("Failed to save to cloud: " + error.message);
+                           } else {
+                             alert("Saved successfully!");
+                           }
+                         } else {
+                           alert("No email found to sync with.");
+                         }
+                       } catch (err: any) {
+                         alert("Error: " + err.message);
+                       }
+                     }}
+                     className="w-full py-2 border border-premium-border rounded text-xs opacity-70 hover:opacity-100 transition-opacity"
+                   >
+                     Save API Key
                    </button>
                  </div>
               </div>
@@ -229,6 +268,34 @@ export default function SettingsPanel() {
                   onChange={handleRestore}
                   className="hidden" 
                 />
+                <button 
+                  onClick={() => {
+                    useAuthStore.getState().setHasCompletedTour(false);
+                    setIsOpen(false);
+                  }}
+                  className="w-full py-2 border border-premium-border rounded text-xs opacity-70 hover:opacity-100 transition-opacity flex items-center justify-center gap-2 text-premium-text bg-premium-panel"
+                >
+                  <Sparkles size={14} /> Replay Guided Tour
+                </button>
+              </div>
+              
+              <div className="pt-8 space-y-3 mt-4 border-t border-premium-border/50">
+                {role === 'admin' && (
+                  <Link 
+                    href="/ops-9a7f3b2c8e1d45f6"
+                    onClick={() => setIsOpen(false)}
+                    className="w-full py-3 bg-premium-text text-black rounded font-medium hover:opacity-90 transition-opacity mb-2 flex items-center justify-center gap-2"
+                  >
+                    <Users size={16} /> Admin Console
+                  </Link>
+                )}
+                <button 
+                  type="button"
+                  onClick={() => { logout(); setIsOpen(false); window.location.href = "/"; }}
+                  className="w-full py-3 bg-red-500/10 text-red-500 rounded font-medium hover:bg-red-500/20 transition-colors"
+                >
+                  Log Out
+                </button>
               </div>
             </div>
           </div>

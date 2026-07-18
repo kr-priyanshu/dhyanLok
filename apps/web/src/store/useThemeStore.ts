@@ -6,7 +6,7 @@ interface ThemeState {
   textColor: string;
   headingFont: string; 
   accentColor?: string;
-  setTheme: (theme: Partial<ThemeState>) => void;
+  setTheme: (theme: Partial<Omit<ThemeState, 'setTheme'>>) => void;
 }
 
 export const useThemeStore = create<ThemeState>()(
@@ -20,6 +20,10 @@ export const useThemeStore = create<ThemeState>()(
     }),
     {
       name: 'theme-storage',
+      version: 1,
+      migrate: (persistedState: any, version: number) => {
+        return persistedState as ThemeState;
+      },
     }
   )
 );

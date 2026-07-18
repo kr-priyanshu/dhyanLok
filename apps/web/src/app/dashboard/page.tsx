@@ -1,15 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useHabitStore } from "@/store/useHabitStore";
+import { useAuthStore } from "@/store/useAuthStore";
 import ProgressRing from "@/components/ProgressRing";
+import FeatureTour from "@/components/FeatureTour";
 import { Check, Clock, Plus, Trash2, Flame, GripVertical } from "lucide-react";
 import { format, subDays } from "date-fns";
 import { motion } from "framer-motion";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+import AIAssistant from "@/components/AIAssistant";
+import ActivityHeatmap from "@/components/ActivityHeatmap";
+import CategoryRadar from "@/components/CategoryRadar";
 
 export default function Dashboard() {
   const { habits, logs, addHabit, removeHabit, toggleLog, reorderHabit } = useHabitStore();
+  const { username } = useAuthStore();
   const [mounted, setMounted] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -23,34 +29,36 @@ export default function Dashboard() {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null;
+  const today = useMemo(() => new Date(), []);
+  const todayStr = useMemo(() => format(today, 'yyyy-MM-dd'), [today]);
+  const todayLabel = useMemo(() => format(today, 'EEEE, MMMM do'), [today]);
 
-  const todayStr = format(new Date(), 'yyyy-MM-dd');
-  const todayLabel = format(new Date(), 'EEEE, MMMM do');
+  if (!mounted) return null;
   
   // Count how many habits are completed TODAY
   const completedCount = habits.filter(h => logs[`${todayStr}_${h._id}`] === 'completed').length;
   const progress = habits.length ? (completedCount / habits.length) * 100 : 0;
 
-  // Calculate streaks for a habit
+  // Calculate streaks for a habit — single pass optimized
   const getStreak = (habitId: string) => {
     let current = 0;
     let longest = 0;
     let tempStreak = 0;
-    const today = new Date();
+    let isCurrentBroken = false;
     
-    // Check up to 365 days back for longest streak
+    // Scan backwards from today up to 365 days
     for (let i = 0; i < 365; i++) {
       const dayStr = format(subDays(today, i), 'yyyy-MM-dd');
       if (logs[`${dayStr}_${habitId}`] === 'completed') {
+        if (!isCurrentBroken) current++;
         tempStreak++;
-        if (i === current) current = tempStreak; // current streak is contiguous from today
-      } else {
         if (tempStreak > longest) longest = tempStreak;
+      } else {
+        // First miss breaks the current streak
+        isCurrentBroken = true;
         tempStreak = 0;
       }
     }
-    if (tempStreak > longest) longest = tempStreak;
     return { current, longest };
   };
 
@@ -128,19 +136,23 @@ export default function Dashboard() {
       transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
       className="flex flex-col gap-12 mt-12"
     >
+      {/* Feature tour — self-gates via hasCompletedTour, shows only once */}
+      <FeatureTour />
       <header className="flex flex-col md:flex-row justify-between md:items-end gap-6 border-b border-premium-border pb-8 mb-4">
         <div>
-          <h1 className="text-5xl md:text-7xl font-heading tracking-tighter mb-4 text-premium-text leading-none">Dashboard</h1>
+          <h1 className="text-5xl md:text-7xl font-heading tracking-tighter mb-4 text-premium-text leading-none capitalize">
+            {username ? `Welcome, ${username}` : 'Dashboard'}
+          </h1>
           <p className="text-premium-muted font-sans text-sm tracking-widest uppercase">{todayLabel}</p>
         </div>
-        <div className="hidden md:block">
+        <div data-tour="dashboard-progress" className="hidden md:block">
            <ProgressRing progress={progress} radius={40} stroke={3} />
         </div>
       </header>
 
       {/* Stats Section */}
       {habits.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <div data-tour="dashboard-stats" className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div className="glass-panel p-5 rounded-xl border border-premium-border flex flex-col justify-between">
             <span className="text-xs font-mono uppercase tracking-widest text-premium-muted mb-4">7-Day Trend</span>
             <div className="flex items-end gap-2 h-12">
@@ -171,8 +183,20 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Advanced Data Visualization */}
+      {habits.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          <div className="md:col-span-2">
+             <ActivityHeatmap />
+          </div>
+          <div className="md:col-span-1">
+             <CategoryRadar />
+          </div>
+        </div>
+      )}
+
       {/* Habits List */}
-      <div className="flex flex-col gap-8">
+      <div data-tour="habit-list" className="flex flex-col gap-8">
         <DragDropContext onDragEnd={onDragEnd}>
           {activeCategories.map((category) => (
             <div key={category} className="flex flex-col gap-4">
@@ -206,14 +230,17 @@ export default function Dashboard() {
                                 >
                                   <GripVertical size={18} />
                                 </div>
-                                <div 
+                                <button
+                                  role="checkbox"
+                                  aria-checked={isCompleted}
                                   className={`h-6 w-6 rounded-full flex items-center justify-center border transition-all duration-300 cursor-pointer flex-shrink-0 ${
                                     isCompleted ? 'bg-premium-accent text-black border-premium-accent' : 'border-premium-border text-transparent'
                                   }`}
-                                  onClick={() => toggleLog(habit._id, todayStr)}
+                                  onClick={(e) => { e.stopPropagation(); toggleLog(habit._id, todayStr); }}
+                                  aria-label={`Mark ${habit.title} as ${isCompleted ? 'incomplete' : 'complete'}`}
                                 >
                                   <Check size={12} strokeWidth={3} />
-                                </div>
+                                </button>
                                 <div className="flex flex-col cursor-pointer" onClick={() => toggleLog(habit._id, todayStr)}>
                                   <h3 className={`text-lg font-medium tracking-tight ${isCompleted ? 'line-through text-premium-muted' : 'text-premium-text'}`}>
                                     {habit.title}
@@ -242,9 +269,8 @@ export default function Dashboard() {
                                   </div>
                                 )}
                                 <button 
-                                  onClick={() => removeHabit(habit._id)}
-                                  className="opacity-0 group-hover:opacity-100 text-premium-muted hover:text-red-500 transition-opacity p-2 flex-shrink-0"
-                                  title="Remove Habit"
+                                  onClick={(e) => { e.stopPropagation(); removeHabit(habit._id); }}
+                                  className="opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 text-premium-muted hover:text-red-500 transition-opacity p-2 flex-shrink-0"
                                   aria-label={`Remove ${habit.title}`}
                                 >
                                   <Trash2 size={16} />
@@ -262,6 +288,8 @@ export default function Dashboard() {
             </div>
           ))}
         </DragDropContext>
+        
+        <AIAssistant />
 
         {isAdding ? (
           <form onSubmit={handleAdd} className="glass-panel p-5 rounded-xl border border-premium-border animate-in fade-in zoom-in-95 duration-200 mt-4">
@@ -324,6 +352,7 @@ export default function Dashboard() {
           </form>
         ) : (
           <button 
+            data-tour="add-habit"
             onClick={() => setIsAdding(true)}
             className="flex items-center gap-3 p-5 rounded-xl border border-dashed border-premium-border text-premium-muted hover:border-premium-text hover:text-premium-text transition-all duration-300 mt-4"
           >

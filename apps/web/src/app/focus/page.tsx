@@ -14,6 +14,7 @@ export default function Focus() {
   const [realTime, setRealTime] = useState(new Date());
   const [mounted, setMounted] = useState(false);
   const [quoteIndex, setQuoteIndex] = useState(0);
+  const [timerStartDate, setTimerStartDate] = useState("");
 
   const quotes = [
     "You do not rise to the level of your goals. You fall to the level of your systems. — James Clear",
@@ -65,6 +66,10 @@ export default function Focus() {
       osc2.start();
       osc1.stop(ctx.currentTime + 2.5);
       osc2.stop(ctx.currentTime + 2.5);
+      
+      setTimeout(() => {
+        if (ctx.state !== 'closed') ctx.close();
+      }, 3000);
     } catch (e) {
       console.error("Audio API not supported or disabled", e);
     }
@@ -77,13 +82,14 @@ export default function Focus() {
     } else if (activeTimer && timeRemaining === 0) {
       // Timer complete — mark habit as done with actual elapsed time
       playChime();
-      toggleLog(activeTimer, todayStr);
+      toggleLog(activeTimer, timerStartDate || todayStr);
       setActiveTimer(null);
       setTimerDuration(0);
+      setTimerStartDate("");
       if (document.fullscreenElement) document.exitFullscreen();
     }
     return () => clearInterval(interval);
-  }, [activeTimer, timeRemaining, toggleLog, todayStr]);
+  }, [activeTimer, timeRemaining, toggleLog, timerStartDate, todayStr]);
 
   useEffect(() => {
     const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
@@ -97,6 +103,7 @@ export default function Focus() {
       setActiveTimer(habitId);
       setTimerDuration(minutes * 60);
       setTimeRemaining(minutes * 60);
+      setTimerStartDate(todayStr);
       setRealTime(new Date());
     } catch (e) {
       console.error("Fullscreen failed", e);
@@ -160,7 +167,7 @@ export default function Focus() {
             <div key={habit._id} className="group glass-panel relative flex items-center justify-between p-5 rounded-xl hover:border-premium-muted transition-all duration-300">
               <button 
                 onClick={() => toggleLog(habit._id, todayStr)}
-                className="absolute -left-6 md:-left-12 h-10 w-10 md:h-12 md:w-12 rounded-full border border-premium-border bg-premium-bg flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:border-premium-text hover:bg-premium-text hover:text-black cursor-pointer z-20"
+                className="absolute -left-6 md:-left-12 h-10 w-10 md:h-12 md:w-12 rounded-full border border-premium-border bg-premium-bg flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 transition-all duration-300 hover:border-premium-text hover:bg-premium-text hover:text-black cursor-pointer z-20"
                 aria-label={`Complete ${habit.title}`}
               >
                 <span className="sr-only">Complete</span>

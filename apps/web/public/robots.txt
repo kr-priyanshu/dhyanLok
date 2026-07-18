@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+
+Sitemap: https://web-two-rose-30.vercel.app/sitemap.xml

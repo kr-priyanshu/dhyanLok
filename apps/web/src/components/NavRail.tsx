@@ -16,7 +16,7 @@ export default function NavRail() {
   return (
     <>
       {/* Desktop Side Rail */}
-      <nav className="hidden md:flex fixed left-0 top-0 bottom-0 w-16 flex-col items-center justify-center gap-6 z-[100]" aria-label="Main navigation">
+      <nav data-tour="nav" className="hidden md:flex fixed left-0 top-0 bottom-0 w-16 flex-col items-center justify-center gap-6 z-[100]" aria-label="Main navigation">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
@@ -26,6 +26,7 @@ export default function NavRail() {
               href={item.href}
               aria-label={item.label}
               aria-current={isActive ? "page" : undefined}
+              data-tour={`nav-${item.label.toLowerCase()}`}
               className={`group relative h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
                 isActive
                   ? "bg-premium-text text-[var(--theme-bg)]"

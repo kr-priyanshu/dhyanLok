@@ -1,9 +1,10 @@
-const CACHE_NAME = 'silence-keeper-cache-v1';
+const CACHE_NAME = 'dhyanlok-cache-v4';
 const urlsToCache = [
   '/',
   '/dashboard',
   '/focus',
   '/notebook',
+  '/onboarding',
   '/icon.svg',
 ];
 
@@ -17,7 +18,18 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
+  const cacheWhitelist = [CACHE_NAME];
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
 });
 
 self.addEventListener('fetch', (event) => {

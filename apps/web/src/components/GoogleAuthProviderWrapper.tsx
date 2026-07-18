@@ -14,14 +14,14 @@ export default function GoogleAuthProviderWrapper({ children }: { children: Reac
 
   if (!mounted) return <>{children}</>;
   
-  const activeClientId = googleClientId || "425063335581-2ubb3pr3lt6194r34nmbomcil3bio1h2.apps.googleusercontent.com";
-
-  if (!activeClientId) {
+  if (!googleClientId) {
     return <>{children}</>;
   }
 
+  // key={googleClientId} forces a full remount when the client ID changes,
+  // ensuring useGoogleLogin hooks in child components reinitialize correctly.
   return (
-    <GoogleOAuthProvider clientId={activeClientId}>
+    <GoogleOAuthProvider clientId={googleClientId} key={googleClientId}>
       {children}
     </GoogleOAuthProvider>
   );

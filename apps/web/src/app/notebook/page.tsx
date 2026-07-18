@@ -4,12 +4,13 @@ import React, { useState, useEffect, useRef } from "react";
 import { useHabitStore } from "@/store/useHabitStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { format, subDays, isSameDay } from "date-fns";
-import { Book, ChevronLeft, ChevronRight, Mic, Square, Loader2, Play, CloudUpload } from "lucide-react";
+import { Book, ChevronLeft, ChevronRight, Mic, Square, Loader2, Play, CloudUpload, Sparkles } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
 import { get, set as idbSet } from "idb-keyval";
+import { GoogleGenAI } from "@google/genai";
 
 export default function Notebook() {
-  const { habits, logs, journals, audioFiles, setJournal, toggleLog, setAudioFile } = useHabitStore();
+  const { habits, logs, journals, transcripts, audioFiles, setJournal, setTranscript, toggleLog, setAudioFile } = useHabitStore();
   const { googleClientId } = useAuthStore();
   
   const [selectedDateObj, setSelectedDateObj] = useState(new Date());
@@ -22,6 +23,7 @@ export default function Notebook() {
   const [isRecording, setIsRecording] = useState(false);
   const [isDictating, setIsDictating] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isRefining, setIsRefining] = useState(false);
   const [localAudioURL, setLocalAudioURL] = useState<string | null>(null);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -30,14 +32,16 @@ export default function Notebook() {
 
   useEffect(() => { setMounted(true); }, []);
   
-  // Load local audio when selecting a new date
   useEffect(() => {
     if (!mounted) return;
+    let currentObjectUrl: string | null = null;
+    
     const loadLocalAudio = async () => {
       try {
         const blob = await get(`audio_${selectedDateStr}`);
         if (blob) {
-          setLocalAudioURL(URL.createObjectURL(blob));
+          currentObjectUrl = URL.createObjectURL(blob);
+          setLocalAudioURL(currentObjectUrl);
         } else {
           setLocalAudioURL(null);
         }
@@ -46,48 +50,23 @@ export default function Notebook() {
       }
     };
     loadLocalAudio();
+    
+    return () => {
+      if (currentObjectUrl) {
+        URL.revokeObjectURL(currentObjectUrl);
+      }
+    };
   }, [selectedDateStr, mounted]);
 
-  const uploadToDrive = async (blob: Blob, accessToken: string) => {
-    setUploading(true);
-    try {
-      const metadata = {
-        name: `DhyanLok_Journal_${selectedDateStr}.webm`,
-        mimeType: 'audio/webm',
-      };
-      const form = new FormData();
-      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-      form.append('file', blob);
-
-      const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: form
-      });
-      const data = await res.json();
-      if (data.id) {
-        setAudioFile(selectedDateStr, data.id);
-        alert("Audio saved to Google Drive!");
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isJournalOpen) {
+        setIsJournalOpen(false);
       }
-    } catch (e) {
-      console.error("Upload failed", e);
-      alert("Failed to upload to Google Drive");
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const loginAndUpload = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      if (audioChunksRef.current.length > 0) {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        await uploadToDrive(audioBlob, tokenResponse.access_token);
-      }
-    },
-    scope: 'https://www.googleapis.com/auth/drive.file',
-  });
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isJournalOpen]);
 
   const startRecording = async () => {
     try {
@@ -104,11 +83,6 @@ export default function Notebook() {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
         await idbSet(`audio_${selectedDateStr}`, audioBlob);
         setLocalAudioURL(URL.createObjectURL(audioBlob));
-        
-        const activeClientId = googleClientId || "425063335581-2ubb3pr3lt6194r34nmbomcil3bio1h2.apps.googleusercontent.com";
-        if (activeClientId) {
-          loginAndUpload();
-        }
       };
 
       mediaRecorder.start();
@@ -120,8 +94,7 @@ export default function Notebook() {
         recognition.continuous = true;
         recognition.interimResults = true;
         
-        let finalTranscript = journals[selectedDateStr] || "";
-        // Pre-append a newline if there's already text
+        let finalTranscript = transcripts[selectedDateStr] || "";
         if (finalTranscript.trim().length > 0) finalTranscript += "\n\n";
         
         recognition.onresult = (e: any) => {
@@ -131,11 +104,10 @@ export default function Notebook() {
               finalTranscript += e.results[i][0].transcript + " ";
               currentFinal = finalTranscript;
             } else {
-               // Append interim result for real-time feel
                currentFinal += e.results[i][0].transcript;
             }
           }
-          setJournal(selectedDateStr, currentFinal);
+          setTranscript(selectedDateStr, currentFinal);
         };
         
         recognitionRef.current = recognition;
@@ -157,6 +129,33 @@ export default function Notebook() {
     if (recognitionRef.current && isDictating) {
       recognitionRef.current.stop();
       setIsDictating(false);
+    }
+  };
+
+  const refineTranscript = async () => {
+    const geminiApiKey = useAuthStore.getState().geminiApiKey;
+    if (!geminiApiKey) {
+      alert("Please set your Gemini API Key in the Settings panel first!");
+      return;
+    }
+    const currentTranscript = transcripts[selectedDateStr];
+    if (!currentTranscript || currentTranscript.trim().length === 0) return;
+
+    setIsRefining(true);
+    try {
+      const ai = new GoogleGenAI({ apiKey: geminiApiKey });
+      const response = await ai.models.generateContent({
+        model: 'gemini-3.1-flash-lite',
+        contents: `You are an expert editor. Clean up the following dictated transcript. Fix grammar, punctuation, and typos, but DO NOT change the core meaning or the speaker's original voice. Transcript:\n\n${currentTranscript}`,
+      });
+      if (response.text) {
+        setTranscript(selectedDateStr, response.text);
+      }
+    } catch (err) {
+      console.error("Gemini refinement failed:", err);
+      alert("Failed to refine transcript.");
+    } finally {
+      setIsRefining(false);
     }
   };
 
@@ -304,22 +303,52 @@ export default function Notebook() {
               <span className="text-premium-muted font-mono text-sm tracking-widest">{format(selectedDateObj, 'MMMM do, yyyy')}</span>
             </header>
             
-            <textarea 
-              autoFocus
-              placeholder={`Write or dictate your reflections for ${format(selectedDateObj, 'MMMM do')}...`}
-              value={journals[selectedDateStr] || ""}
-              onChange={(e) => setJournal(selectedDateStr, e.target.value)}
-              className="w-full bg-transparent border border-premium-border rounded-xl p-4 text-premium-text flex-1 outline-none focus:border-[var(--theme-accent)] transition-colors resize-none leading-relaxed min-h-[200px]"
-            />
+            <div className="flex flex-col md:flex-row gap-4 flex-1">
+              <textarea 
+                autoFocus
+                placeholder={`Write your reflections for ${format(selectedDateObj, 'MMMM do')}...`}
+                value={journals[selectedDateStr] || ""}
+                onChange={(e) => setJournal(selectedDateStr, e.target.value)}
+                className="w-full md:w-1/2 bg-transparent border border-premium-border rounded-xl p-4 text-premium-text outline-none focus:border-[var(--theme-accent)] transition-colors resize-none leading-relaxed min-h-[200px]"
+              />
+              <div className="w-full md:w-1/2 flex flex-col gap-2">
+                <textarea 
+                  placeholder="Voice Transcripts will appear here..."
+                  value={transcripts[selectedDateStr] || ""}
+                  onChange={(e) => setTranscript(selectedDateStr, e.target.value)}
+                  className="w-full bg-black/10 border border-premium-border rounded-xl p-4 text-premium-muted outline-none focus:border-[var(--theme-accent)] transition-colors resize-none leading-relaxed flex-1"
+                />
+                {transcripts[selectedDateStr] && transcripts[selectedDateStr].length > 0 && (
+                  <button 
+                    onClick={refineTranscript}
+                    disabled={isRefining || isDictating}
+                    className="text-xs font-mono tracking-widest uppercase flex items-center justify-center gap-2 bg-[var(--theme-bg)] border border-[var(--theme-accent)]/50 text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-black transition-colors rounded-lg py-2 disabled:opacity-50 disabled:pointer-events-none"
+                  >
+                    {isRefining ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                    {isRefining ? "Refining..." : "Refine with AI"}
+                  </button>
+                )}
+              </div>
+            </div>
             
             {/* Audio Elements */}
             <div className="mt-4 flex flex-col gap-4">
               {localAudioURL && (
                 <div className="flex items-center gap-4 bg-premium-panel p-3 rounded-xl border border-premium-border">
                    <audio src={localAudioURL} controls className="flex-1 h-10" />
-                   {audioFiles[selectedDateStr] && (
+                   {audioFiles[selectedDateStr] ? (
                      <div className="text-xs font-mono tracking-widest text-premium-muted flex items-center gap-2">
                        <CloudUpload size={14} className="text-[var(--theme-accent)]" /> Synced
+                     </div>
+                   ) : googleClientId ? (
+                     <GoogleSyncButton 
+                       selectedDateStr={selectedDateStr} 
+                       audioChunksRef={audioChunksRef}
+                       setAudioFile={setAudioFile}
+                     />
+                   ) : (
+                     <div className="text-[10px] text-premium-muted font-mono max-w-[120px] text-right">
+                       Set Google Client ID in settings to enable Drive sync
                      </div>
                    )}
                 </div>
@@ -364,5 +393,105 @@ export default function Notebook() {
         Press <kbd className="font-mono bg-premium-panel text-premium-muted border border-premium-border px-2 py-1 rounded mx-1">Ctrl+K</kbd> to navigate
       </p>
     </div>
+  );
+}
+
+function GoogleSyncButton({ 
+  selectedDateStr, 
+  audioChunksRef, 
+  setAudioFile 
+}: { 
+  selectedDateStr: string, 
+  audioChunksRef: React.MutableRefObject<Blob[]>,
+  setAudioFile: (date: string, fileId: string) => void
+}) {
+  const [uploading, setUploading] = useState(false);
+
+  const uploadToDrive = async (blob: Blob, accessToken: string) => {
+    setUploading(true);
+    try {
+      const query = encodeURIComponent("mimeType='application/vnd.google-apps.folder' and name='DhyanLok_Log' and trashed=false");
+      const searchRes = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&fields=files(id)`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
+      const searchData = await searchRes.json();
+      let folderId = searchData.files?.[0]?.id;
+      
+      if (!folderId) {
+        const createRes = await fetch('https://www.googleapis.com/drive/v3/files', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            name: 'DhyanLok_Log',
+            mimeType: 'application/vnd.google-apps.folder',
+          })
+        });
+        const createData = await createRes.json();
+        folderId = createData.id;
+      }
+
+      const metadata: any = {
+        name: `DhyanLok_Journal_${selectedDateStr}.webm`,
+        mimeType: 'audio/webm',
+      };
+      if (folderId) {
+        metadata.parents = [folderId];
+      }
+
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('file', blob);
+
+      const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: form
+      });
+      const data = await res.json();
+      if (data.id) {
+        setAudioFile(selectedDateStr, data.id);
+        alert("Audio saved to DhyanLok_Log in Google Drive!");
+      }
+    } catch (e) {
+      console.error("Upload failed", e);
+      alert("Failed to upload to Google Drive");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const loginAndUpload = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      let audioBlob: Blob | null = null;
+      if (audioChunksRef.current.length > 0) {
+        audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+      } else {
+        const { get: idbGet } = await import('idb-keyval');
+        audioBlob = await idbGet(`audio_${selectedDateStr}`) as Blob;
+      }
+      
+      if (audioBlob) {
+        await uploadToDrive(audioBlob, tokenResponse.access_token);
+      } else {
+        alert("No audio found to upload.");
+      }
+    },
+    scope: 'https://www.googleapis.com/auth/drive.file',
+  });
+
+  return (
+    <button 
+      onClick={() => loginAndUpload()} 
+      disabled={uploading}
+      className="text-xs font-mono tracking-widest flex items-center gap-2 bg-[var(--theme-accent)] text-black px-3 py-1.5 rounded hover:opacity-80 transition-opacity whitespace-nowrap disabled:opacity-50"
+    >
+      {uploading ? <Loader2 size={14} className="animate-spin" /> : <CloudUpload size={14} />}
+      {uploading ? "Uploading..." : "Sync to Drive"}
+    </button>
   );
 }
