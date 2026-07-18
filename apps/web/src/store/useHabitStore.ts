@@ -39,9 +39,7 @@ export const useHabitStore = create<HabitState>()(
   persist(
     (set) => ({
       habits: [
-        { _id: crypto.randomUUID(), title: "Read 20 pages", type: "binary", isActive: true, category: "Learning" },
         { _id: crypto.randomUUID(), title: "Deep Work", type: "timer", targetTimeMinutes: 90, isActive: true, category: "Work" },
-        { _id: crypto.randomUUID(), title: "Exercise", type: "binary", isActive: true, category: "Health" },
       ],
       logs: {},
       journals: {},
