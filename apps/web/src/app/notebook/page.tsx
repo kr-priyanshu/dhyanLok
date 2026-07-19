@@ -459,21 +459,34 @@ function GoogleSyncButton({
         metadata.parents = [folderId];
       }
 
-      const form = new FormData();
-      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-      form.append('file', blob);
-
-      const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+      // 1. Create file metadata first
+      const metadataRes = await fetch('https://www.googleapis.com/drive/v3/files', {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
         },
-        body: form
+        body: JSON.stringify(metadata)
       });
-      const data = await res.json();
-      if (data.id) {
-        setAudioFile(selectedDateStr, data.id);
+      const metadataData = await metadataRes.json();
+      
+      if (!metadataData.id) throw new Error("Failed to create file metadata");
+
+      // 2. Upload the actual audio blob data
+      const uploadRes = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${metadataData.id}?uploadType=media`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          'Content-Type': 'audio/webm'
+        },
+        body: blob
+      });
+      
+      if (uploadRes.ok) {
+        setAudioFile(selectedDateStr, metadataData.id);
         alert("Audio saved to DhyanLok_Log in Google Drive!");
+      } else {
+        throw new Error("Failed to upload media");
       }
     } catch (e) {
       console.error("Upload failed", e);
