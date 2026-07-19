@@ -3,9 +3,10 @@
 import { useEffect, useState, useMemo } from "react";
 import { useHabitStore } from "@/store/useHabitStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useUIStore } from "@/store/useUIStore";
 import ProgressRing from "@/components/ProgressRing";
 import FeatureTour from "@/components/FeatureTour";
-import { Check, Clock, Plus, Trash2, Flame, GripVertical } from "lucide-react";
+import { Check, Clock, Plus, Trash2, Flame, GripVertical, Command } from "lucide-react";
 import { format, subDays } from "date-fns";
 import { motion } from "framer-motion";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
@@ -18,6 +19,7 @@ const CategoryRadar = dynamic(() => import("@/components/CategoryRadar"), { ssr:
 export default function Dashboard() {
   const { habits, logs, addHabit, removeHabit, toggleLog, reorderHabit } = useHabitStore();
   const { username } = useAuthStore();
+  const { setIsCommandPaletteOpen } = useUIStore();
   const [mounted, setMounted] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [newTitle, setNewTitle] = useState("");
@@ -133,19 +135,27 @@ export default function Dashboard() {
 
   return (
     <motion.div 
-      initial={{ opacity: 0, scale: 1.15, y: 40 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
-      transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-      className="flex flex-col gap-12 mt-12"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="flex flex-col gap-6 md:gap-12 mt-6 md:mt-12 max-w-5xl mx-auto px-4 md:px-0"
     >
       {/* Feature tour — self-gates via hasCompletedTour, shows only once */}
       <FeatureTour />
-      <header className="flex flex-col md:flex-row justify-between md:items-end gap-6 border-b border-premium-border pb-8 mb-4">
+      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-premium-border pb-8">
         <div>
           <h1 className="text-5xl md:text-7xl font-heading tracking-tighter mb-4 text-premium-text leading-none capitalize">
             {username ? `Welcome, ${username}` : 'Dashboard'}
           </h1>
-          <p className="text-premium-muted font-sans text-sm tracking-widest uppercase">{todayLabel}</p>
+          <div className="flex items-center gap-4">
+            <p className="text-premium-muted font-sans text-sm tracking-widest uppercase">{todayLabel}</p>
+            <button 
+              onClick={() => setIsCommandPaletteOpen(true)}
+              className="flex items-center gap-2 px-3 py-1 bg-premium-panel border border-premium-border rounded-full text-xs text-premium-muted hover:text-premium-text transition-colors"
+            >
+              <Command size={12} />
+              <span>Actions</span>
+            </button>
+          </div>
         </div>
         <div data-tour="dashboard-progress" className="hidden md:block">
            <ProgressRing progress={progress} radius={40} stroke={3} />
@@ -364,9 +374,14 @@ export default function Dashboard() {
         )}
       </div>
       
-      <p className="text-center text-xs text-premium-muted opacity-50 mt-8 font-sans tracking-wide">
-        Press <kbd className="font-mono bg-premium-panel text-premium-muted border border-premium-border px-2 py-1 rounded mx-1">Ctrl+K</kbd> to navigate
-      </p>
+      <div className="flex justify-center mt-8">
+        <button 
+          onClick={() => setIsCommandPaletteOpen(true)}
+          className="text-center text-xs text-premium-muted opacity-50 font-sans tracking-wide hover:opacity-100 transition-opacity p-2 rounded-lg hover:bg-premium-panel"
+        >
+          Press <kbd className="font-mono bg-premium-panel text-premium-text border border-premium-border px-2 py-1 rounded mx-1">Ctrl+K</kbd> to navigate
+        </button>
+      </div>
     </motion.div>
   );
 }

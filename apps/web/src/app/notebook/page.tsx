@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useHabitStore } from "@/store/useHabitStore";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useUIStore } from "@/store/useUIStore";
 import { format, subDays, isSameDay } from "date-fns";
 import { Book, ChevronLeft, ChevronRight, Mic, Square, Loader2, Play, CloudUpload, Sparkles } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
@@ -12,6 +13,7 @@ import { GoogleGenAI } from "@google/genai";
 export default function Notebook() {
   const { habits, logs, journals, transcripts, audioFiles, setJournal, setTranscript, toggleLog, setAudioFile } = useHabitStore();
   const { googleClientId } = useAuthStore();
+  const { setIsCommandPaletteOpen } = useUIStore();
   
   const [selectedDateObj, setSelectedDateObj] = useState(new Date());
   const [isJournalOpen, setIsJournalOpen] = useState(false);
@@ -428,9 +430,14 @@ export default function Notebook() {
         </div>
       )}
       
-      <p className="text-center text-xs text-premium-muted opacity-50 mt-12 font-sans tracking-wide">
-        Press <kbd className="font-mono bg-premium-panel text-premium-muted border border-premium-border px-2 py-1 rounded mx-1">Ctrl+K</kbd> to navigate
-      </p>
+      <div className="flex justify-center mt-12">
+        <button 
+          onClick={() => setIsCommandPaletteOpen(true)}
+          className="text-center text-xs text-premium-muted opacity-50 font-sans tracking-wide hover:opacity-100 transition-opacity p-2 rounded-lg hover:bg-premium-panel"
+        >
+          Press <kbd className="font-mono bg-premium-panel text-premium-text border border-premium-border px-2 py-1 rounded mx-1">Ctrl+K</kbd> to navigate
+        </button>
+      </div>
     </div>
   );
 }

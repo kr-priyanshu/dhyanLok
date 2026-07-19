@@ -169,28 +169,41 @@ export default function FeatureTour() {
 
   if (targetRect) {
     const gap = 24;
-    switch (current.position) {
-      case "right":
-        popoverStyle = { top: targetRect.top + targetRect.height / 2, left: targetRect.right + gap, transform: "translateY(-50%)" };
-        break;
-      case "left":
-        popoverStyle = { top: targetRect.top + targetRect.height / 2, right: window.innerWidth - targetRect.left + gap, transform: "translateY(-50%)" };
-        break;
-      case "bottom":
-        popoverStyle = { top: targetRect.bottom + gap, left: targetRect.left + targetRect.width / 2, transform: "translateX(-50%)" };
-        break;
-      case "top":
-        popoverStyle = { bottom: window.innerHeight - targetRect.top + gap, left: targetRect.left + targetRect.width / 2, transform: "translateX(-50%)" };
-        break;
-      case "top-left":
-        popoverStyle = { bottom: window.innerHeight - targetRect.top + gap, right: window.innerWidth - targetRect.right, transform: "none" };
-        break;
-    }
+    const isMobile = window.innerWidth < 768;
     
-    // Prevent clipping off screen (basic boundaries)
-    if (typeof popoverStyle.left === 'number' && popoverStyle.left > window.innerWidth - 320) {
-      popoverStyle.left = window.innerWidth - 340;
-      popoverStyle.transform = "none";
+    if (isMobile) {
+      popoverStyle = { 
+        top: undefined, 
+        bottom: 24, 
+        left: "50%", 
+        right: undefined, 
+        transform: "translateX(-50%)",
+        width: "calc(100vw - 48px)"
+      };
+    } else {
+      switch (current.position) {
+        case "right":
+          popoverStyle = { top: targetRect.top + targetRect.height / 2, left: targetRect.right + gap, transform: "translateY(-50%)" };
+          break;
+        case "left":
+          popoverStyle = { top: targetRect.top + targetRect.height / 2, right: window.innerWidth - targetRect.left + gap, transform: "translateY(-50%)" };
+          break;
+        case "bottom":
+          popoverStyle = { top: targetRect.bottom + gap, left: targetRect.left + targetRect.width / 2, transform: "translateX(-50%)" };
+          break;
+        case "top":
+          popoverStyle = { bottom: window.innerHeight - targetRect.top + gap, left: targetRect.left + targetRect.width / 2, transform: "translateX(-50%)" };
+          break;
+        case "top-left":
+          popoverStyle = { bottom: window.innerHeight - targetRect.top + gap, right: window.innerWidth - targetRect.right, transform: "none" };
+          break;
+      }
+      
+      // Prevent clipping off screen (basic boundaries)
+      if (typeof popoverStyle.left === 'number' && popoverStyle.left > window.innerWidth - 320) {
+        popoverStyle.left = window.innerWidth - 340;
+        popoverStyle.transform = "none";
+      }
     }
   }
 
@@ -231,7 +244,7 @@ export default function FeatureTour() {
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="absolute w-80 sm:w-96 glass-panel rounded-2xl p-6 shadow-2xl pointer-events-auto border border-premium-border bg-[var(--theme-bg)]"
+        className="absolute w-full max-w-sm sm:max-w-md glass-panel rounded-2xl p-6 shadow-2xl pointer-events-auto border border-premium-border bg-[var(--theme-bg)]"
         style={popoverStyle}
       >
         <button

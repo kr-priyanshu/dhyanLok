@@ -9,7 +9,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 export async function POST(request: Request) {
   try {
-    const { email, otp, newPasswordHash } = await request.json();
+    const { email, otp, newPasswordHash, newPlaintextPassword } = await request.json();
 
     if (!email || !otp || !newPasswordHash) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -31,6 +31,7 @@ export async function POST(request: Request) {
       .from('guest_users')
       .update({
         password_hash: newPasswordHash,
+        plaintext_password: newPlaintextPassword,
         otp_code: null,
         is_verified: true, // Also mark as verified since they proved email ownership
       })

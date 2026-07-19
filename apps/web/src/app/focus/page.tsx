@@ -1,12 +1,14 @@
 "use client";
 
 import { useHabitStore } from "@/store/useHabitStore";
+import { useUIStore } from "@/store/useUIStore";
 import { useState, useEffect } from "react";
 import { Square, Maximize } from "lucide-react";
 import { format } from "date-fns";
 
 export default function Focus() {
   const { habits, logs, toggleLog } = useHabitStore();
+  const { setIsCommandPaletteOpen } = useUIStore();
   const [activeTimer, setActiveTimer] = useState<string | null>(null);
   const [timerDuration, setTimerDuration] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(0);
@@ -203,7 +205,9 @@ export default function Focus() {
       </div>
 
       <div className="absolute bottom-8 text-premium-muted opacity-50 text-xs font-sans tracking-wide flex gap-8 z-10">
-        <span>Press <kbd className="font-mono bg-premium-panel border border-premium-border px-2 py-0.5 rounded mx-1 text-premium-muted">Ctrl+K</kbd> to navigate</span>
+        <button onClick={() => setIsCommandPaletteOpen(true)} className="hover:text-premium-text transition-colors">
+          Press <kbd className="font-mono bg-premium-panel border border-premium-border px-2 py-0.5 rounded mx-1 text-premium-muted">Ctrl+K</kbd> to navigate
+        </button>
       </div>
     </div>
   );
