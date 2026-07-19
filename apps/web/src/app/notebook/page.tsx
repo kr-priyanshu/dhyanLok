@@ -459,39 +459,50 @@ function GoogleSyncButton({
         metadata.parents = [folderId];
       }
 
-      // 1. Create file metadata first
-      const metadataRes = await fetch('https://www.googleapis.com/drive/v3/files', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(metadata)
-      });
-      const metadataData = await metadataRes.json();
-      
-      if (!metadataData.id) throw new Error("Failed to create file metadata");
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        try {
+          const base64Data = (reader.result as string).split(',')[1];
+          const boundary = '-------314159265358979323846';
+          const delimiter = "\r\n--" + boundary + "\r\n";
+          const close_delim = "\r\n--" + boundary + "--";
+          
+          const body = delimiter +
+            'Content-Type: application/json\r\n\r\n' +
+            JSON.stringify(metadata) +
+            delimiter +
+            'Content-Type: audio/webm\r\n' +
+            'Content-Transfer-Encoding: base64\r\n\r\n' +
+            base64Data +
+            close_delim;
 
-      // 2. Upload the actual audio blob data
-      const uploadRes = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${metadataData.id}?uploadType=media`, {
-        method: 'PATCH',
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          'Content-Type': 'audio/webm'
-        },
-        body: blob
-      });
-      
-      if (uploadRes.ok) {
-        setAudioFile(selectedDateStr, metadataData.id);
-        alert("Audio saved to DhyanLok_Log in Google Drive!");
-      } else {
-        throw new Error("Failed to upload media");
-      }
-    } catch (e) {
-      console.error("Upload failed", e);
-      alert("Failed to upload to Google Drive");
-    } finally {
+          const uploadRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`,
+              'Content-Type': `multipart/related; boundary=${boundary}`
+            },
+            body: body
+          });
+          
+          const uploadData = await uploadRes.json();
+          if (uploadData.id) {
+            setAudioFile(selectedDateStr, uploadData.id);
+            alert("Audio saved to DhyanLok_Log in Google Drive!");
+          } else {
+            throw new Error(uploadData.error?.message || "Unknown upload error");
+          }
+        } catch (e: any) {
+          console.error("Upload failed", e);
+          alert(`Drive Error: ${e.message}`);
+        } finally {
+          setUploading(false);
+        }
+      };
+      reader.readAsDataURL(blob);
+    } catch (e: any) {
+      console.error("Prep failed", e);
+      alert(`Prep Error: ${e.message}`);
       setUploading(false);
     }
   };
