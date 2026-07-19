@@ -7,9 +7,18 @@
   <br />
 
   <!-- PROMINENT DIRECT WEBSITE LINK BUTTON -->
-  <a href="https://dhyanlok.priyanshudays.me/" target="_blank">
-    <img src="https://img.shields.io/badge/%F0%9F%9A%80_OPEN_LIVE_WEBSITE-dhyanlok.priyanshudays.me-101010?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=000000" height="48" alt="Open Live Website" />
-  </a>
+---
+
+## 🌐 Quick Access — Launch Website Directly
+
+No installation, zero friction, and no setup required. Click the link below to open the application in your browser:
+
+<div align="center">
+
+# 🚀 **[Click Here to Open DhyanLok Website](https://dhyanlok.priyanshudays.me/)** 🚀
+*(Direct URL: https://dhyanlok.priyanshudays.me/)*
+
+</div>
 
   <br /><br />
 
@@ -29,18 +38,6 @@
   <br /><br />
 </div>
 
----
-
-## 🌐 Quick Access — Launch Website Directly
-
-No installation, zero friction, and no setup required. Click the link below to open the application in your browser:
-
-<div align="center">
-
-# 🚀 **[Click Here to Open DhyanLok Website](https://dhyanlok.priyanshudays.me/)** 🚀
-*(Direct URL: https://dhyanlok.priyanshudays.me/)*
-
-</div>
 
 ---
 
