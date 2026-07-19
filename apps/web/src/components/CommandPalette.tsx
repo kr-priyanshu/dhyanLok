@@ -75,35 +75,7 @@ export default function CommandPalette() {
                   >
                     Go to Session Focus
                   </Command.Item>
-                  <Command.Item 
-                    onSelect={() => { 
-                      router.push('/dashboard'); 
-                      setTimeout(() => {
-                        const { useAuthStore } = require('@/store/useAuthStore');
-                        useAuthStore.getState().setHasCompletedTour(false);
-                      }, 100);
-                      setOpen(false); 
-                    }}
-                    onMouseDown={() => { 
-                      router.push('/dashboard'); 
-                      setTimeout(() => {
-                        const { useAuthStore } = require('@/store/useAuthStore');
-                        useAuthStore.getState().setHasCompletedTour(false);
-                      }, 100);
-                      setOpen(false); 
-                    }}
-                    onPointerDown={() => { 
-                      router.push('/dashboard'); 
-                      setTimeout(() => {
-                        const { useAuthStore } = require('@/store/useAuthStore');
-                        useAuthStore.getState().setHasCompletedTour(false);
-                      }, 100);
-                      setOpen(false); 
-                    }}
-                    className="cursor-pointer px-4 py-2 rounded-md hover:bg-premium-panel text-premium-text transition-colors aria-selected:bg-premium-panel aria-selected:text-premium-accent"
-                  >
-                    Replay Guided Tour
-                  </Command.Item>
+
                 </Command.Group>
               </Command.List>
             </Command>
