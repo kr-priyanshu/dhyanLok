@@ -27,10 +27,10 @@ export default function NavRail() {
               aria-label={item.label}
               aria-current={isActive ? "page" : undefined}
               data-tour={`nav-${item.label.toLowerCase()}`}
-              className={`group relative h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-300 ${
+              className={`group relative h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-300 hover:scale-110 active:scale-95 ${
                 isActive
-                  ? "bg-premium-text text-[var(--theme-bg)]"
-                  : "text-premium-muted hover:text-premium-text"
+                  ? "bg-premium-text text-[var(--theme-bg)] shadow-[0_0_15px_rgba(255,255,255,0.3)]"
+                  : "text-premium-muted hover:text-premium-text hover:bg-premium-border/30"
               }`}
             >
               <Icon size={18} strokeWidth={isActive ? 2.5 : 1.5} />

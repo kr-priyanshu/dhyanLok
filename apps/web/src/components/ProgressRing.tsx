@@ -30,10 +30,11 @@ export default function ProgressRing({
           cy={radius}
         />
         <circle
-          className="text-premium-accent transition-all duration-1000 ease-out"
+          className="text-premium-text transition-all duration-1000 ease-out"
           style={{ 
             stroke: 'currentColor',
-            strokeDashoffset
+            strokeDashoffset,
+            filter: 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.4))'
           }}
           strokeDasharray={circumference + ' ' + circumference}
           fill="transparent"
@@ -44,7 +45,7 @@ export default function ProgressRing({
           cy={radius}
         />
       </svg>
-      <div className="absolute font-mono text-sm text-premium-accent">
+      <div className="absolute font-mono text-sm font-semibold text-premium-text tracking-tighter">
         {Math.round(progress)}%
       </div>
     </div>

@@ -27,15 +27,6 @@ No installation, zero friction, and no setup required. Click the link below to o
   </a>
 
   <br /><br />
-
-  <!-- CLICKABLE APP SCREENSHOTS -->
-  <a href="https://dhyanlok.priyanshudays.me/"><img src="https://raw.githubusercontent.com/kr-priyanshu/dhyanLok/master/apps/web/public/preview-dashboard.png" width="850" alt="Click to open DhyanLok Dashboard" /></a>
-  
-  <br /><br />
-
-  <a href="https://dhyanlok.priyanshudays.me/"><img src="https://raw.githubusercontent.com/kr-priyanshu/dhyanLok/master/apps/web/public/preview-focus.png" width="850" alt="Click to open DhyanLok Focus Mode" /></a>
-
-  <br /><br />
 </div>
 
 
@@ -64,6 +55,26 @@ DhyanLok replaces loud, gamified habit apps with a quiet digital system. Six cor
 - **Database & Auth:** Supabase & SHA-256 Hashing
 - **AI & Voice Integration:** Google Gemini Multimodal API
 - **Storage:** IndexedDB (`idb-keyval`) & Google Drive REST API
+
+---
+
+## 📸 Screenshots & Previews
+
+Click any screenshot below to open the live app directly:
+
+<div align="center">
+
+  ### Dashboard View
+  <a href="https://dhyanlok.priyanshudays.me/"><img src="https://raw.githubusercontent.com/kr-priyanshu/dhyanLok/master/apps/web/public/preview-dashboard.png" width="850" alt="Click to open DhyanLok Dashboard" /></a>
+  
+  <br /><br />
+
+  ### Focus Mode View
+  <a href="https://dhyanlok.priyanshudays.me/"><img src="https://raw.githubusercontent.com/kr-priyanshu/dhyanLok/master/apps/web/public/preview-focus.png" width="850" alt="Click to open DhyanLok Focus Mode" /></a>
+
+  <br />
+
+</div>
 
 ---
 
