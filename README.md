@@ -10,8 +10,8 @@
 
   <br /><br />
 
-  <a href="https://dhyanlok.vercel.app">
-    <img src="https://img.shields.io/badge/LIVE_DEMO-Launch_Web_App-101010?style=for-the-badge&logo=vercel&logoColor=white&labelColor=000000" alt="Launch Live Web App" />
+  <a href="https://dhyanlok.priyanshudays.me/">
+    <img src="https://img.shields.io/badge/LIVE_APP-Experience_DhyanLok-101010?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=000000" alt="Launch Live Web App" />
   </a>
   <a href="https://github.com/kr-priyanshu/dhyanLok">
     <img src="https://img.shields.io/badge/STATUS-Production_Ready-10B981?style=for-the-badge&labelColor=064E3B" alt="Production Ready" />
@@ -28,7 +28,7 @@ No installation, zero friction, and no technical setup required. Click below to 
 
 <div align="center">
 
-### 👉 **[dhyanlok.vercel.app](https://dhyanlok.vercel.app)** 👈
+### 👉 **[dhyanlok.priyanshudays.me](https://dhyanlok.priyanshudays.me/)** 👈
 
 </div>
 
@@ -36,7 +36,7 @@ No installation, zero friction, and no technical setup required. Click below to 
 
 ## ⚙️ How the Sanctuary Works
 
-DhyanLok replaces loud, gamified habit apps with a quiet digital system. Four core pillars power your daily flow:
+DhyanLok replaces loud, gamified habit apps with a quiet digital system. Six core pillars power your daily flow:
 
 | Feature | Powered By | Experience Live |
 | :--- | :--- | :--- |
@@ -49,54 +49,14 @@ DhyanLok replaces loud, gamified habit apps with a quiet digital system. Four co
 
 ---
 
-## ⚡ Try Live vs. Self-Hosting
+## 🛠️ Tech Stack
 
-| | Live Web App (Recommended) | Self-Hosting (Local Dev) |
-| :--- | :---: | :---: |
-| **Setup Time** | **Instant (0 sec)** | 5 - 10 minutes |
-| **Node.js / Terminal Required** | No | Yes (v18+) |
-| **Database Setup** | Pre-configured | Requires Supabase |
-| **Access URL** | [dhyanlok.vercel.app](https://dhyanlok.vercel.app) | `localhost:3000` |
-
----
-
-## 🛠️ Local Development & Self-Hosting
-
-If you prefer to run your own private instance or contribute to the repository:
-
-### Prerequisites
-- **Node.js** (v18 or higher)
-- **Supabase Account** (for cloud database storage)
-- **Google Gemini API Key** (optional, for AI voice features)
-
-### Quick Setup
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/kr-priyanshu/dhyanLok.git
-   cd dhyanLok
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment Variables:**
-   Create `.env.local` inside `apps/web/`:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
-   ```
-   *(Note: You can also enter API keys directly in the web app's Settings panel.)*
-
-4. **Start the local server:**
-   ```bash
-   cd apps/web
-   npm run dev
-   ```
-   Navigate to `http://localhost:3000` in your web browser.
+- **Framework:** Next.js 14 (App Router)
+- **Styling:** TailwindCSS & Glassmorphism Dark Mode Design
+- **State Management:** Zustand with offline persistence
+- **Database & Auth:** Supabase & SHA-256 Hashing
+- **AI & Voice Integration:** Google Gemini Multimodal API
+- **Storage:** IndexedDB (`idb-keyval`) & Google Drive REST API
 
 ---
 
@@ -104,4 +64,4 @@ If you prefer to run your own private instance or contribute to the repository:
 
 Created with mindfulness by **Priyanshu**.
 
-Explore the live app: **[dhyanlok.vercel.app](https://dhyanlok.vercel.app)**
+Experience DhyanLok live: **[dhyanlok.priyanshudays.me](https://dhyanlok.priyanshudays.me/)**
