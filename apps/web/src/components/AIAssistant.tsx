@@ -13,16 +13,13 @@ export default function AIAssistant() {
   const [isRecording, setIsRecording] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [statusText, setStatusText] = useState("");
-  const recognitionRef = useRef<any>(null);
-  const inputRef = useRef(""); // Tracks latest input to avoid stale closures
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
   const autoCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { habits, addHabit, removeHabit } = useHabitStore();
   const { geminiApiKey } = useAuthStore();
 
-  // Keep inputRef in sync with input state
-  useEffect(() => {
-    inputRef.current = input;
-  }, [input]);
+
 
   // Clean up timer on unmount
   useEffect(() => {
@@ -48,8 +45,8 @@ export default function AIAssistant() {
     return () => document.removeEventListener("keydown", down);
   }, [isRecording]);
 
-  const handleProcessCommand = async (command: string) => {
-    if (!command.trim()) return;
+  const handleProcessCommand = async (command: string, audioData?: { base64: string, mimeType: string }) => {
+    if (!command.trim() && !audioData) return;
     if (!geminiApiKey) {
       setStatusText("Please add your Gemini API Key in Settings first.");
       return;
@@ -92,9 +89,24 @@ export default function AIAssistant() {
       Respond strictly with the requested JSON schema.
       `;
 
+      const contents = [
+        {
+          role: 'user',
+          parts: [
+            { text: prompt },
+            ...(audioData ? [{
+              inlineData: {
+                data: audioData.base64,
+                mimeType: audioData.mimeType
+              }
+            }] : [])
+          ]
+        }
+      ];
+
       const response = await ai.models.generateContent({
-        model: 'gemini-3.1-flash-lite',
-        contents: prompt,
+        model: 'gemini-1.5-flash',
+        contents: contents as any,
         config: {
           responseMimeType: "application/json",
           responseSchema: responseSchema,
@@ -142,58 +154,57 @@ export default function AIAssistant() {
     }
   };
 
-  const startRecording = () => {
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setStatusText("Speech recognition not supported in this browser.");
-      return;
-    }
-    
-    // Stop any existing recognition before starting a new one
-    if (recognitionRef.current && isRecording) {
-      recognitionRef.current.stop();
-    }
-    
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    
-    recognition.onresult = (e: any) => {
-      let finalTranscript = "";
-      for (let i = e.resultIndex; i < e.results.length; i++) {
-        finalTranscript += e.results[i][0].transcript;
-      }
-      setInput(finalTranscript);
-    };
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
 
-    recognition.onerror = (e: any) => {
-      console.error("Speech recognition error:", e.error);
-      if (e.error === 'not-allowed') {
-        setStatusText("Microphone access denied. Please allow mic permissions in your browser.");
-      } else {
-        setStatusText(`Microphone error: ${e.error}`);
-      }
-    };
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          audioChunksRef.current.push(e.data);
+        }
+      };
 
-    recognition.onend = () => {
-      setIsRecording(false);
-      // Read from the ref to get the latest value (avoids stale closure)
-      const latestInput = inputRef.current;
-      if (latestInput.trim()) {
-         handleProcessCommand(latestInput);
-      }
-    };
-    
-    recognitionRef.current = recognition;
-    recognition.start();
-    setIsRecording(true);
-    setStatusText("Listening...");
+      mediaRecorder.onstart = () => {
+        setIsRecording(true);
+        setStatusText("Listening... (Press Stop when done)");
+      };
+
+      mediaRecorder.onstop = async () => {
+        setIsRecording(false);
+        setStatusText("Processing voice...");
+        
+        // Stop all tracks to free up mic icon in browser tab
+        stream.getTracks().forEach(track => track.stop());
+        
+        const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType });
+        if (audioBlob.size > 0) {
+           const reader = new FileReader();
+           reader.onloadend = () => {
+             const base64Data = (reader.result as string).split(',')[1];
+             handleProcessCommand("Voice command received.", {
+               base64: base64Data,
+               mimeType: mediaRecorder.mimeType || 'audio/webm' // fallback mime if undefined
+             });
+           };
+           reader.readAsDataURL(audioBlob);
+        } else {
+           setStatusText("No audio detected.");
+        }
+      };
+
+      mediaRecorder.start();
+    } catch (err: any) {
+      console.error("Microphone error:", err);
+      setStatusText("Microphone access denied or error occurred.");
+    }
   };
 
   const stopRecording = () => {
-    if (recognitionRef.current && isRecording) {
-      recognitionRef.current.stop();
-      setIsRecording(false);
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === "recording") {
+      mediaRecorderRef.current.stop();
     }
   };
 
