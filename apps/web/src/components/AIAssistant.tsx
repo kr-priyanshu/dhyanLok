@@ -247,6 +247,7 @@ export default function AIAssistant() {
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-heading tracking-tight flex items-center gap-2 text-premium-text">
                 <Sparkles size={16} /> DhyanLok AI
+                {isRecording && <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse ml-2" />}
               </h3>
               <button onClick={() => setIsOpen(false)} className="text-premium-muted hover:text-red-500 transition-colors" aria-label="Close AI Assistant">
                 <X size={18} />
@@ -272,7 +273,7 @@ export default function AIAssistant() {
                   <button 
                     type="button"
                     onClick={stopRecording}
-                    className="flex-1 flex items-center justify-center gap-2 py-2 rounded border border-red-500 text-red-500 bg-red-500/10 text-xs font-medium uppercase tracking-widest"
+                    className="flex-1 flex items-center justify-center gap-2 py-2 rounded border border-red-500 text-red-500 bg-red-500/10 text-xs font-medium uppercase tracking-widest animate-pulse"
                   >
                     <Square size={14} /> Stop
                   </button>
