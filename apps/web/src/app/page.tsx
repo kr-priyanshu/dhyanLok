@@ -365,8 +365,8 @@ export default function Home() {
   }[mode];
 
   const pageSubtitle = {
-    login: 'Enter your credentials to unlock your sanctuary.',
-    signup: 'Enter your credentials to unlock your sanctuary.',
+    login: 'Welcome back to your personal sanctuary. Step in to resume your focus.',
+    signup: 'Begin your journey toward mindfulness, clarity, and daily mastery.',
     otp: emailDelivered
       ? 'We sent a 6-digit code to your email.'
       : 'Check your spam, or skip verification below.',
@@ -520,7 +520,7 @@ export default function Home() {
               <div className="flex flex-col gap-3">
                 <button type="submit" disabled={isSubmitting}
                   className="w-full py-4 rounded-xl bg-premium-text text-[var(--theme-bg)] font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-50">
-                  {isSubmitting ? "Processing..." : (mode === 'signup' ? "Create Sandbox" : "Unlock Sandbox")} <ArrowRight size={18} />
+                  {isSubmitting ? "Opening Realm..." : (mode === 'signup' ? "Begin Your Journey" : "Enter Your Realm")} <ArrowRight size={18} />
                 </button>
                 {mode === 'login' && (
                   <button type="button" onClick={() => switchMode('forgot')}
