@@ -33,12 +33,19 @@ export default function AIAssistant() {
     if (!isRecording) startRecording();
   };
 
-  // Keyboard shortcut Ctrl + M
+  // Keyboard shortcuts
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
+      // Open AI Assistant: Ctrl + M
       if (e.key === "m" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         handleOpen();
+      }
+      
+      // Stop Recording: Space
+      if (e.code === "Space" && isRecording) {
+        e.preventDefault();
+        stopRecording();
       }
     };
     document.addEventListener("keydown", down);
