@@ -1,50 +1,53 @@
 # DhyanLok (ध्यानलोक)
 
-DhyanLok is a minimalist habit tracker, voice-powered daily journal, and focus sanctuary. It is designed to help you build meaningful habits without the noise, clutter, or gamified pressure of traditional apps.
+> A calm, minimalist habit tracker, voice-powered daily journal, and focus sanctuary. Built for clarity and daily consistency.
+
+[![Try DhyanLok Live](https://img.shields.io/badge/Live_App-Experience_DhyanLok-black?style=for-the-badge&logo=vercel)](https://dhyanlok.vercel.app)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 
 ---
 
-## Origin & Vision
+### 🌐 Experience It Instantly
 
-Most habit tracking applications feel like bloated spreadsheets or social media feeds designed to generate anxiety. DhyanLok was created as a quiet digital sanctuary—a space where tracking your habits feels peaceful, effortless, and personal.
+No installation, zero friction, and no technical setup required. Try the full live application directly in your browser:
 
-Whether you want to check off daily habits, dictate your thoughts using AI to polish your transcripts, sync voice logs to your own Google Drive, or enter a zero-distraction focus clock, DhyanLok gives you a calm system to stay consistent.
-
----
-
-## Key Features
-
-### Habit HQ & Analytics
-- **Binary & Timer Habits:** Track simple check-off habits or set custom Pomodoro target timers.
-- **365-Day Activity Heatmap:** Visualize your consistency across an entire year.
-- **Category Radar & Trends:** Monitor growth across Health, Mindset, Learning, and Creativity.
-- **Drag & Drop:** Reorder habits into categories that fit your workflow.
-
-### Voice Journaling & Refinement
-- **Dictation:** Record daily journal entries naturally.
-- **AI Transcript Refinement:** Powered by Google Gemini, audio transcripts are polished instantly with your choice of tone: *Clean*, *Formal*, *Informal*, or *Casual*.
-- **Google Drive Sync:** Direct REST integration syncs audio logs to a `DhyanLok_Log` folder in your personal Google Drive.
-
-### Focus & Automation
-- **Ultra-Focus Mode:** Full-screen Pomodoro timer with rotating wisdom quotes.
-- **DhyanLok AI Voice Assistant (`Ctrl + M`):** Hands-free voice commands to add or remove habits.
-- **Command Palette (`Ctrl + K`):** Global keyboard navigation across all app pages.
-
-### Mobile & Responsive Design
-- Optimized layout with a mobile bottom navigation bar, top-corner settings, and zero horizontal scrolling.
+👉 **[Launch Live Web App — dhyanlok.vercel.app](https://dhyanlok.vercel.app)**
 
 ---
 
-## Quickstart Guide
+## Why DhyanLok?
 
-Running DhyanLok locally takes only a few minutes.
+Traditional habit trackers often feel like loud, gamified apps that create pressure rather than peace. DhyanLok was created as a quiet digital sanctuary—a space where tracking habits and journaling your thoughts feels peaceful, effortless, and deeply personal.
 
-### Requirements
-- **Node.js:** Version 18 or higher ([Download Node.js](https://nodejs.org/))
-- **Supabase Account:** Free database account ([Supabase](https://supabase.com))
-- **Google Gemini API Key:** Optional, for AI voice features ([Google AI Studio](https://aistudio.google.com/))
+Instead of cloning code or configuring local databases, you can open the live web app right now to experience:
 
-### Installation Steps
+- **Instant Interactive Sandbox:** Start tracking habits and testing features immediately.
+- **AI Voice Journaling:** Dictate your thoughts aloud and let Google Gemini refine your raw speech into polished journal entries (with custom tone selection: *Clean*, *Formal*, *Informal*, or *Casual*).
+- **Direct Google Drive Integration:** Sync your audio recordings directly to a `DhyanLok_Log` folder in your personal Google Drive account.
+- **Ultra-Focus Mode:** Step into a dark, distraction-free Pomodoro clock with rotating wisdom quotes.
+- **DhyanLok AI (`Ctrl + M`):** Speak natural commands to manage habits hands-free.
+
+---
+
+## What You Can Try Live
+
+1. **Habit HQ & Visual Analytics:** Track binary check-offs, set Pomodoro timers, view 365-day activity heatmaps, and monitor category radar trends.
+2. **Voice Journaling:** Test natural speech dictation and instant AI transcript cleanup.
+3. **Speed Navigation:** Press `Ctrl + K` (or tap the Actions button) anywhere in the app to open the global Command Palette.
+4. **Mobile & Desktop:** Fully responsive across mobile phones, tablets, and desktop displays.
+
+---
+
+## Self-Hosting & Local Development
+
+If you prefer to run your own private instance or contribute to the codebase:
+
+### Prerequisites
+- Node.js (v18 or higher)
+- Supabase account (for cloud database)
+- Google Gemini API Key (for AI voice features)
+
+### Quick Setup
 
 1. **Clone the repository:**
    ```bash
@@ -58,46 +61,35 @@ Running DhyanLok locally takes only a few minutes.
    ```
 
 3. **Configure Environment Variables:**
-   Create a `.env.local` file inside `apps/web/`:
+   Create `.env.local` inside `apps/web/`:
    ```env
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_api_key
    ```
-   *Note: You can also enter your API keys directly inside the app's Settings panel.*
+   *(Note: You can also enter API keys directly in the web app's Settings panel.)*
 
-4. **Start the Development Server:**
+4. **Start the local server:**
    ```bash
    cd apps/web
    npm run dev
    ```
-   Navigate to `http://localhost:3000` in your web browser.
 
 ---
 
 ## Tech Stack
 
 - **Framework:** Next.js 14 (App Router)
-- **Styling:** TailwindCSS with CSS custom properties
+- **Styling:** TailwindCSS & Glassmorphism Design
 - **State Management:** Zustand with offline persistence
 - **Database & Auth:** Supabase & SHA-256 Hashing
-- **AI Integration:** Google Gemini Multimodal API
-- **Local Audio Storage:** IndexedDB (`idb-keyval`)
-
----
-
-## Contributing
-
-Contributions and feedback are welcome.
-
-1. Fork the repository.
-2. Create a feature branch: `git checkout -b feature/your-feature-name`
-3. Commit your changes: `git commit -m "Add your feature"`
-4. Push to the branch: `git push origin feature/your-feature-name`
-5. Open a Pull Request.
+- **AI & Voice:** Google Gemini Multimodal API
+- **Storage:** IndexedDB (`idb-keyval`) & Google Drive REST API
 
 ---
 
 ## Author
 
 Created by **Priyanshu**.
+
+Experience DhyanLok live: **[dhyanlok.vercel.app](https://dhyanlok.vercel.app)**
