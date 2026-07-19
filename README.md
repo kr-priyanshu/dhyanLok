@@ -18,6 +18,14 @@
   </a>
 
   <br /><br />
+
+  <a href="https://dhyanlok.priyanshudays.me/"><img src="https://raw.githubusercontent.com/kr-priyanshu/dhyanLok/master/apps/web/public/preview-dashboard.png" width="850" alt="DhyanLok Dashboard Preview" /></a>
+  
+  <br /><br />
+
+  <a href="https://dhyanlok.priyanshudays.me/"><img src="https://raw.githubusercontent.com/kr-priyanshu/dhyanLok/master/apps/web/public/preview-focus.png" width="850" alt="DhyanLok Focus Mode Preview" /></a>
+
+  <br /><br />
 </div>
 
 ---
