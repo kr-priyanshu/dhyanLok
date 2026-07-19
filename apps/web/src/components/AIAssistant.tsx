@@ -33,9 +33,7 @@ export default function AIAssistant() {
 
   const handleOpen = () => {
     setIsOpen(true);
-    setTimeout(() => {
-      if (!isRecording) startRecording();
-    }, 300);
+    if (!isRecording) startRecording();
   };
 
   // Keyboard shortcut Ctrl + M
@@ -166,6 +164,15 @@ export default function AIAssistant() {
         finalTranscript += e.results[i][0].transcript;
       }
       setInput(finalTranscript);
+    };
+
+    recognition.onerror = (e: any) => {
+      console.error("Speech recognition error:", e.error);
+      if (e.error === 'not-allowed') {
+        setStatusText("Microphone access denied. Please allow mic permissions in your browser.");
+      } else {
+        setStatusText(`Microphone error: ${e.error}`);
+      }
     };
 
     recognition.onend = () => {
