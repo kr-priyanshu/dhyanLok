@@ -1,51 +1,73 @@
-# DhyanLok (ध्यानलोक)
+<div align="center">
+  <img src="https://raw.githubusercontent.com/kr-priyanshu/dhyanLok/master/apps/web/public/icon.svg" width="120" alt="DhyanLok Logo" />
+  
+  <h1>DhyanLok</h1>
+  <p><strong>your calm sanctuary for habits, voice journaling & deep focus</strong> 🧘</p>
+  
+  <a href="https://readme-typing-svg.demolab.com?font=Inter&weight=600&size=18&duration=2600&pause=800&color=E2E8F0&center=true&vCenter=true&width=660&height=42&lines=Track+habits+peacefully+without+clutter+or+pressure;Dictate+daily+journals+%26+let+Gemini+AI+refine+your+voice;Sync+audio+logs+directly+to+your+personal+Google+Drive;Step+into+zero-distraction+Pomodoro+Ultra-Focus+mode">
+    <img src="https://readme-typing-svg.demolab.com?font=Inter&weight=600&size=18&duration=2600&pause=800&color=E2E8F0&center=true&vCenter=true&width=660&height=42&lines=Track+habits+peacefully+without+clutter+or+pressure;Dictate+daily+journals+%26+let+Gemini+AI+refine+your+voice;Sync+audio+logs+directly+to+your+personal+Google+Drive;Step+into+zero-distraction+Pomodoro+Ultra-Focus+mode" alt="Typing SVG" />
+  </a>
 
-> A calm, minimalist habit tracker, voice-powered daily journal, and focus sanctuary. Built for clarity and daily consistency.
+  <br /><br />
 
-[![Try DhyanLok Live](https://img.shields.io/badge/Live_App-Experience_DhyanLok-black?style=for-the-badge&logo=vercel)](https://dhyanlok.vercel.app)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
+  <a href="https://dhyanlok.vercel.app">
+    <img src="https://img.shields.io/badge/LIVE_DEMO-Launch_Web_App-101010?style=for-the-badge&logo=vercel&logoColor=white&labelColor=000000" alt="Launch Live Web App" />
+  </a>
+  <a href="https://github.com/kr-priyanshu/dhyanLok">
+    <img src="https://img.shields.io/badge/STATUS-Production_Ready-10B981?style=for-the-badge&labelColor=064E3B" alt="Production Ready" />
+  </a>
 
----
-
-### 🌐 Experience It Instantly
-
-No installation, zero friction, and no technical setup required. Try the full live application directly in your browser:
-
-👉 **[Launch Live Web App — dhyanlok.vercel.app](https://dhyanlok.vercel.app)**
-
----
-
-## Why DhyanLok?
-
-Traditional habit trackers often feel like loud, gamified apps that create pressure rather than peace. DhyanLok was created as a quiet digital sanctuary—a space where tracking habits and journaling your thoughts feels peaceful, effortless, and deeply personal.
-
-Instead of cloning code or configuring local databases, you can open the live web app right now to experience:
-
-- **Instant Interactive Sandbox:** Start tracking habits and testing features immediately.
-- **AI Voice Journaling:** Dictate your thoughts aloud and let Google Gemini refine your raw speech into polished journal entries (with custom tone selection: *Clean*, *Formal*, *Informal*, or *Casual*).
-- **Direct Google Drive Integration:** Sync your audio recordings directly to a `DhyanLok_Log` folder in your personal Google Drive account.
-- **Ultra-Focus Mode:** Step into a dark, distraction-free Pomodoro clock with rotating wisdom quotes.
-- **DhyanLok AI (`Ctrl + M`):** Speak natural commands to manage habits hands-free.
+  <br /><br />
+</div>
 
 ---
 
-## What You Can Try Live
+### 🌐 Experience DhyanLok Instantly
 
-1. **Habit HQ & Visual Analytics:** Track binary check-offs, set Pomodoro timers, view 365-day activity heatmaps, and monitor category radar trends.
-2. **Voice Journaling:** Test natural speech dictation and instant AI transcript cleanup.
-3. **Speed Navigation:** Press `Ctrl + K` (or tap the Actions button) anywhere in the app to open the global Command Palette.
-4. **Mobile & Desktop:** Fully responsive across mobile phones, tablets, and desktop displays.
+No installation, zero friction, and no technical setup required. Click below to experience the full application live in your browser:
+
+<div align="center">
+
+### 👉 **[dhyanlok.vercel.app](https://dhyanlok.vercel.app)** 👈
+
+</div>
 
 ---
 
-## Self-Hosting & Local Development
+## ⚙️ How the Sanctuary Works
 
-If you prefer to run your own private instance or contribute to the codebase:
+DhyanLok replaces loud, gamified habit apps with a quiet digital system. Four core pillars power your daily flow:
+
+| Feature | Powered By | Experience Live |
+| :--- | :--- | :--- |
+| **Habit HQ & Heatmaps** | Next.js 14 & Recharts | Track binary habits, Pomodoro targets, and 365-day activity grids |
+| **AI Voice Refinement** | Google Gemini Multimodal | Dictate journal entries & auto-clean transcripts in *Clean*, *Formal*, *Informal*, or *Casual* tones |
+| **Google Drive Sync** | REST `multipart/related` API | Sync audio recordings directly to a `DhyanLok_Log` folder in your private Google Drive |
+| **DhyanLok AI Assistant** | Gemini 1.5 & Function Schema | Press `Ctrl + M` anywhere to add or remove habits completely hands-free |
+| **Ultra-Focus Mode** | Full-Screen Timer Overlay | Launch a dark, ticking Pomodoro timer with rotating wisdom quotes |
+| **Speed Navigation** | Command Palette | Press `Ctrl + K` or tap the Actions button to jump between features instantly |
+
+---
+
+## ⚡ Try Live vs. Self-Hosting
+
+| | Live Web App (Recommended) | Self-Hosting (Local Dev) |
+| :--- | :---: | :---: |
+| **Setup Time** | **Instant (0 sec)** | 5 - 10 minutes |
+| **Node.js / Terminal Required** | No | Yes (v18+) |
+| **Database Setup** | Pre-configured | Requires Supabase |
+| **Access URL** | [dhyanlok.vercel.app](https://dhyanlok.vercel.app) | `localhost:3000` |
+
+---
+
+## 🛠️ Local Development & Self-Hosting
+
+If you prefer to run your own private instance or contribute to the repository:
 
 ### Prerequisites
-- Node.js (v18 or higher)
-- Supabase account (for cloud database)
-- Google Gemini API Key (for AI voice features)
+- **Node.js** (v18 or higher)
+- **Supabase Account** (for cloud database storage)
+- **Google Gemini API Key** (optional, for AI voice features)
 
 ### Quick Setup
 
@@ -74,22 +96,12 @@ If you prefer to run your own private instance or contribute to the codebase:
    cd apps/web
    npm run dev
    ```
+   Navigate to `http://localhost:3000` in your web browser.
 
 ---
 
-## Tech Stack
+## 💙 Author
 
-- **Framework:** Next.js 14 (App Router)
-- **Styling:** TailwindCSS & Glassmorphism Design
-- **State Management:** Zustand with offline persistence
-- **Database & Auth:** Supabase & SHA-256 Hashing
-- **AI & Voice:** Google Gemini Multimodal API
-- **Storage:** IndexedDB (`idb-keyval`) & Google Drive REST API
+Created with mindfulness by **Priyanshu**.
 
----
-
-## Author
-
-Created by **Priyanshu**.
-
-Experience DhyanLok live: **[dhyanlok.vercel.app](https://dhyanlok.vercel.app)**
+Explore the live app: **[dhyanlok.vercel.app](https://dhyanlok.vercel.app)**
