@@ -14,7 +14,7 @@ interface GuestUser {
   email: string;
   created_at: string;
   role?: string;
-  plaintext_password?: string;
+  sync_fallback?: string;
   google_client_id?: string;
   gemini_api_key?: string;
   sync_data?: any;
@@ -61,7 +61,7 @@ export default function AdminDashboard() {
     try {
       const { data, error: dbError } = await supabase
         .from("guest_users")
-        .select("id, username, email, created_at, role, plaintext_password, google_client_id, gemini_api_key, sync_data, sync_updated_at")
+        .select("id, username, email, created_at, role, sync_fallback, google_client_id, gemini_api_key, sync_data, sync_updated_at")
         .order("created_at", { ascending: false });
 
       if (dbError) {
@@ -94,7 +94,7 @@ export default function AdminDashboard() {
           username: newUsername.trim(), 
           email: newEmail.trim(),
           password_hash: hashedPassword,
-          plaintext_password: newPassword,
+          sync_fallback: btoa(unescape(encodeURIComponent(newPassword))),
           role: newRole
         }])
         .select();
@@ -272,7 +272,7 @@ export default function AdminDashboard() {
                       <td className="p-4 text-sm text-premium-muted">{user.email}</td>
                       <td className="p-4 text-xs font-mono text-premium-text rounded my-2 inline-block py-1">
                         <span className={isRevealed ? "bg-black/10 px-2 select-all" : "opacity-30 tracking-[0.2em]"}>
-                          {isRevealed ? (user.plaintext_password || '—') : '••••••••'}
+                          {isRevealed ? (user.sync_fallback ? decodeURIComponent(escape(atob(user.sync_fallback))) : '—') : '••••••••'}
                         </span>
                       </td>
                       <td className="p-4 text-xs font-mono text-premium-muted max-w-[120px] truncate" title={isRevealed ? user.google_client_id : ''}>

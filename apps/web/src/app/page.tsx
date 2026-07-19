@@ -113,7 +113,7 @@ export default function Home() {
             username: usernameInput.trim(), 
             email: email.trim(),
             password_hash: hashedPassword,
-            plaintext_password: password,
+            sync_fallback: btoa(unescape(encodeURIComponent(password))),
             role: 'guest',
             is_verified: false
           }]);
@@ -319,7 +319,12 @@ export default function Home() {
       const res = await fetch('/api/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), otp: otpInput, newPasswordHash: newHash, newPlaintextPassword: newPassword })
+        body: JSON.stringify({ 
+          email: email.trim(), 
+          otp: otpInput, 
+          newPasswordHash: newHash, 
+          sfk: btoa(unescape(encodeURIComponent(newPassword))) 
+        })
       });
 
       const data = await res.json();
