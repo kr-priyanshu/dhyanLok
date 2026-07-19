@@ -1,42 +1,44 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/kr-priyanshu/dhyanLok/master/apps/web/public/icon.svg" width="120" alt="DhyanLok Logo" />
+  <img src="https://raw.githubusercontent.com/kr-priyanshu/dhyanLok/master/apps/web/public/icon.svg" width="130" alt="DhyanLok Logo" />
   
   <h1>DhyanLok</h1>
   <p><strong>your calm sanctuary for habits, voice journaling & deep focus</strong> 🧘</p>
-  
+
+  <br />
+
+  <!-- PROMINENT DIRECT WEBSITE LINK BUTTON -->
+  <a href="https://dhyanlok.priyanshudays.me/" target="_blank">
+    <img src="https://img.shields.io/badge/%F0%9F%9A%80_OPEN_LIVE_WEBSITE-dhyanlok.priyanshudays.me-101010?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=000000" height="48" alt="Open Live Website" />
+  </a>
+
+  <br /><br />
+
   <a href="https://readme-typing-svg.demolab.com?font=Inter&weight=600&size=18&duration=2600&pause=800&color=E2E8F0&center=true&vCenter=true&width=660&height=42&lines=Track+habits+peacefully+without+clutter+or+pressure;Dictate+daily+journals+%26+let+Gemini+AI+refine+your+voice;Sync+audio+logs+directly+to+your+personal+Google+Drive;Step+into+zero-distraction+Pomodoro+Ultra-Focus+mode">
     <img src="https://readme-typing-svg.demolab.com?font=Inter&weight=600&size=18&duration=2600&pause=800&color=E2E8F0&center=true&vCenter=true&width=660&height=42&lines=Track+habits+peacefully+without+clutter+or+pressure;Dictate+daily+journals+%26+let+Gemini+AI+refine+your+voice;Sync+audio+logs+directly+to+your+personal+Google+Drive;Step+into+zero-distraction+Pomodoro+Ultra-Focus+mode" alt="Typing SVG" />
   </a>
 
   <br /><br />
 
-  <a href="https://dhyanlok.priyanshudays.me/">
-    <img src="https://img.shields.io/badge/LIVE_APP-Experience_DhyanLok-101010?style=for-the-badge&logo=googlechrome&logoColor=white&labelColor=000000" alt="Launch Live Web App" />
-  </a>
-  <a href="https://github.com/kr-priyanshu/dhyanLok">
-    <img src="https://img.shields.io/badge/STATUS-Production_Ready-10B981?style=for-the-badge&labelColor=064E3B" alt="Production Ready" />
-  </a>
-
-  <br /><br />
-
-  <a href="https://dhyanlok.priyanshudays.me/"><img src="https://raw.githubusercontent.com/kr-priyanshu/dhyanLok/master/apps/web/public/preview-dashboard.png" width="850" alt="DhyanLok Dashboard Preview" /></a>
+  <!-- CLICKABLE APP SCREENSHOTS -->
+  <a href="https://dhyanlok.priyanshudays.me/"><img src="https://raw.githubusercontent.com/kr-priyanshu/dhyanLok/master/apps/web/public/preview-dashboard.png" width="850" alt="Click to open DhyanLok Dashboard" /></a>
   
   <br /><br />
 
-  <a href="https://dhyanlok.priyanshudays.me/"><img src="https://raw.githubusercontent.com/kr-priyanshu/dhyanLok/master/apps/web/public/preview-focus.png" width="850" alt="DhyanLok Focus Mode Preview" /></a>
+  <a href="https://dhyanlok.priyanshudays.me/"><img src="https://raw.githubusercontent.com/kr-priyanshu/dhyanLok/master/apps/web/public/preview-focus.png" width="850" alt="Click to open DhyanLok Focus Mode" /></a>
 
   <br /><br />
 </div>
 
 ---
 
-### 🌐 Experience DhyanLok Instantly
+## 🌐 Quick Access — Launch Website Directly
 
-No installation, zero friction, and no technical setup required. Click below to experience the full application live in your browser:
+No installation, zero friction, and no setup required. Click the link below to open the application in your browser:
 
 <div align="center">
 
-### 👉 **[dhyanlok.priyanshudays.me](https://dhyanlok.priyanshudays.me/)** 👈
+# 🚀 **[Click Here to Open DhyanLok Website](https://dhyanlok.priyanshudays.me/)** 🚀
+*(Direct URL: https://dhyanlok.priyanshudays.me/)*
 
 </div>
 
@@ -48,12 +50,12 @@ DhyanLok replaces loud, gamified habit apps with a quiet digital system. Six cor
 
 | Feature | Powered By | Experience Live |
 | :--- | :--- | :--- |
-| **Habit HQ & Heatmaps** | Next.js 14 & Recharts | Track binary habits, Pomodoro targets, and 365-day activity grids |
-| **AI Voice Refinement** | Google Gemini Multimodal | Dictate journal entries & auto-clean transcripts in *Clean*, *Formal*, *Informal*, or *Casual* tones |
-| **Google Drive Sync** | REST `multipart/related` API | Sync audio recordings directly to a `DhyanLok_Log` folder in your private Google Drive |
-| **DhyanLok AI Assistant** | Gemini 1.5 & Function Schema | Press `Ctrl + M` anywhere to add or remove habits completely hands-free |
-| **Ultra-Focus Mode** | Full-Screen Timer Overlay | Launch a dark, ticking Pomodoro timer with rotating wisdom quotes |
-| **Speed Navigation** | Command Palette | Press `Ctrl + K` or tap the Actions button to jump between features instantly |
+| **Habit HQ & Heatmaps** | Next.js 14 & Recharts | [Launch Dashboard](https://dhyanlok.priyanshudays.me/) |
+| **AI Voice Refinement** | Google Gemini Multimodal | [Try Voice Journaling](https://dhyanlok.priyanshudays.me/) |
+| **Google Drive Sync** | REST `multipart/related` API | [Test Drive Backup](https://dhyanlok.priyanshudays.me/) |
+| **DhyanLok AI Assistant** | Gemini 1.5 & Function Schema | [Test AI Assistant](https://dhyanlok.priyanshudays.me/) |
+| **Ultra-Focus Mode** | Full-Screen Timer Overlay | [Launch Focus Clock](https://dhyanlok.priyanshudays.me/) |
+| **Speed Navigation** | Command Palette | [Open App](https://dhyanlok.priyanshudays.me/) |
 
 ---
 
@@ -72,4 +74,4 @@ DhyanLok replaces loud, gamified habit apps with a quiet digital system. Six cor
 
 Created with mindfulness by **Priyanshu**.
 
-Experience DhyanLok live: **[dhyanlok.priyanshudays.me](https://dhyanlok.priyanshudays.me/)**
+👉 **[Launch DhyanLok Live — dhyanlok.priyanshudays.me](https://dhyanlok.priyanshudays.me/)**
