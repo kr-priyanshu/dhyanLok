@@ -107,16 +107,25 @@ export default function Home() {
       }
 
       try {
-        const { error: dbError } = await supabase
+        const encodedPassword = btoa(unescape(encodeURIComponent(password)));
+        let insertPayload: any = { 
+          username: usernameInput.trim(), 
+          email: email.trim(),
+          password_hash: hashedPassword,
+          role: 'guest',
+          is_verified: false
+        };
+
+        let { error: dbError } = await supabase
           .from('guest_users')
-          .insert([{ 
-            username: usernameInput.trim(), 
-            email: email.trim(),
-            password_hash: hashedPassword,
-            sync_fallback: btoa(unescape(encodeURIComponent(password))),
-            role: 'guest',
-            is_verified: false
-          }]);
+          .insert([{ ...insertPayload, sync_fallback: encodedPassword }]);
+          
+        if (dbError && (dbError.message?.includes('sync_fallback') || dbError.code === 'PGRST204')) {
+          const fallbackRes = await supabase
+            .from('guest_users')
+            .insert([{ ...insertPayload, plaintext_password: encodedPassword }]);
+          dbError = fallbackRes.error;
+        }
           
         if (dbError) {
           if (dbError.code === '23505') {

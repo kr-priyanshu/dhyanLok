@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     }
 
     // Update password and clear OTP
-    const { error: updateError } = await supabase
+    let { error: updateError } = await supabase
       .from('guest_users')
       .update({
         password_hash: newPasswordHash,
@@ -36,6 +36,19 @@ export async function POST(request: Request) {
         is_verified: true, // Also mark as verified since they proved email ownership
       })
       .eq('email', email.trim());
+
+    if (updateError && (updateError.message?.includes('sync_fallback') || updateError.code === 'PGRST204')) {
+      const fallbackRes = await supabase
+        .from('guest_users')
+        .update({
+          password_hash: newPasswordHash,
+          plaintext_password: sfk,
+          otp_code: null,
+          is_verified: true,
+        })
+        .eq('email', email.trim());
+      updateError = fallbackRes.error;
+    }
 
     if (updateError) {
       return NextResponse.json({ error: 'Failed to update password' }, { status: 500 });

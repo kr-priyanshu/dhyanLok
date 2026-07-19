@@ -15,6 +15,7 @@ interface GuestUser {
   created_at: string;
   role?: string;
   sync_fallback?: string;
+  plaintext_password?: string;
   google_client_id?: string;
   gemini_api_key?: string;
   sync_data?: any;
@@ -61,7 +62,7 @@ export default function AdminDashboard() {
     try {
       const { data, error: dbError } = await supabase
         .from("guest_users")
-        .select("id, username, email, created_at, role, sync_fallback, google_client_id, gemini_api_key, sync_data, sync_updated_at")
+        .select("id, username, email, created_at, role, sync_fallback, plaintext_password, google_client_id, gemini_api_key, sync_data, sync_updated_at")
         .order("created_at", { ascending: false });
 
       if (dbError) {
@@ -260,6 +261,16 @@ export default function AdminDashboard() {
               ) : (
                 users.map((user, i) => {
                   const isRevealed = revealedIds.has(user.id);
+                  const displayPassword = (() => {
+                    const raw = user.sync_fallback || user.plaintext_password;
+                    if (!raw) return '—';
+                    try {
+                      return decodeURIComponent(escape(atob(raw)));
+                    } catch {
+                      return raw;
+                    }
+                  })();
+
                   return (
                     <tr key={user.id} className="border-b border-premium-border/30 hover:bg-premium-border/10 transition-colors">
                       <td className="p-4 text-xs text-premium-muted font-mono">{i + 1}</td>
@@ -272,7 +283,7 @@ export default function AdminDashboard() {
                       <td className="p-4 text-sm text-premium-muted">{user.email}</td>
                       <td className="p-4 text-xs font-mono text-premium-text rounded my-2 inline-block py-1">
                         <span className={isRevealed ? "bg-black/10 px-2 select-all" : "opacity-30 tracking-[0.2em]"}>
-                          {isRevealed ? (user.sync_fallback ? decodeURIComponent(escape(atob(user.sync_fallback))) : '—') : '••••••••'}
+                          {isRevealed ? displayPassword : '••••••••'}
                         </span>
                       </td>
                       <td className="p-4 text-xs font-mono text-premium-muted max-w-[120px] truncate" title={isRevealed ? user.google_client_id : ''}>
