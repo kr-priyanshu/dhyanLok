@@ -27,7 +27,7 @@ export default function CloudSyncProvider() {
           .eq('email', registeredEmail)
           .single();
 
-        if (error) throw error;
+        if (error && error.code !== 'PGRST116') throw error;
 
         // If cloud data exists, we check if it's newer than our local data
         // For simplicity, if cloud data exists on first load, we merge or prompt.
