@@ -25,6 +25,7 @@ export default function Notebook() {
   const [uploading, setUploading] = useState(false);
   const [isRefining, setIsRefining] = useState(false);
   const [localAudioURL, setLocalAudioURL] = useState<string | null>(null);
+  const [refineTone, setRefineTone] = useState<string>("clean");
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
@@ -156,13 +157,21 @@ export default function Notebook() {
 
     setIsRefining(true);
     try {
+      const tonePrompts: Record<string, string> = {
+        clean: "Clean up grammar, punctuation, and typos without changing the original meaning or voice.",
+        formal: "Rewrite this to be highly professional, structured, and formal.",
+        informal: "Rewrite this to be friendly, conversational, and informal.",
+        casual: "Rewrite this to be very casual, relaxed, and easygoing."
+      };
+      const promptInstructions = tonePrompts[refineTone] || tonePrompts.clean;
+
       const ai = new GoogleGenAI({ apiKey: geminiApiKey });
       const response = await ai.models.generateContent({
         model: 'gemini-3.1-flash-lite',
-        contents: `You are an expert editor. Clean up the following dictated transcript. Fix grammar, punctuation, and typos, but DO NOT change the core meaning or the speaker's original voice. Transcript:\n\n${currentTranscript}`,
+        contents: `You are an expert editor. ${promptInstructions}\n\nCRITICAL INSTRUCTION: Output ONLY the rewritten transcript. Do not include conversational filler, formatting like 'Here is the rewrite:', lists of options, or any other commentary. Just the final text.\n\nTranscript:\n${currentTranscript}`,
       });
       if (response.text) {
-        setTranscript(selectedDateStr, response.text);
+        setTranscript(selectedDateStr, response.text.trim());
       }
     } catch (err) {
       console.error("Gemini refinement failed:", err);
@@ -332,14 +341,26 @@ export default function Notebook() {
                   className="w-full bg-black/10 border border-premium-border rounded-xl p-4 text-premium-muted outline-none focus:border-[var(--theme-accent)] transition-colors resize-none leading-relaxed flex-1"
                 />
                 {transcripts[selectedDateStr] && transcripts[selectedDateStr].length > 0 && (
-                  <button 
-                    onClick={refineTranscript}
-                    disabled={isRefining || isDictating}
-                    className="text-xs font-mono tracking-widest uppercase flex items-center justify-center gap-2 bg-[var(--theme-bg)] border border-[var(--theme-accent)]/50 text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-black transition-colors rounded-lg py-2 disabled:opacity-50 disabled:pointer-events-none"
-                  >
-                    {isRefining ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-                    {isRefining ? "Refining..." : "Refine with AI"}
-                  </button>
+                  <div className="flex gap-2">
+                    <select 
+                      value={refineTone} 
+                      onChange={(e) => setRefineTone(e.target.value)}
+                      className="bg-[var(--theme-bg)] border border-[var(--theme-accent)]/50 text-[var(--theme-accent)] rounded-lg px-2 py-2 text-xs font-mono uppercase tracking-widest outline-none focus:border-[var(--theme-accent)]"
+                    >
+                      <option value="clean">Clean</option>
+                      <option value="formal">Formal</option>
+                      <option value="informal">Informal</option>
+                      <option value="casual">Casual</option>
+                    </select>
+                    <button 
+                      onClick={refineTranscript}
+                      disabled={isRefining || isDictating}
+                      className="flex-1 text-xs font-mono tracking-widest uppercase flex items-center justify-center gap-2 bg-[var(--theme-bg)] border border-[var(--theme-accent)]/50 text-[var(--theme-accent)] hover:bg-[var(--theme-accent)] hover:text-black transition-colors rounded-lg py-2 disabled:opacity-50 disabled:pointer-events-none"
+                    >
+                      {isRefining ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                      {isRefining ? "Refining..." : "Refine"}
+                    </button>
+                  </div>
                 )}
               </div>
             </div>
