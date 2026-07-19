@@ -157,43 +157,43 @@ export default function Focus() {
   }
 
   return (
-    <div className="fixed inset-0 bg-premium-bg flex flex-col items-center justify-center p-8 z-[100] animate-in fade-in duration-1000">
+    <div className="flex flex-col items-center justify-center py-6 sm:py-12 px-4 w-full max-w-2xl mx-auto min-h-[70vh] animate-in fade-in duration-1000">
       <div className="w-full max-w-2xl space-y-4 relative z-10">
         {pendingHabits.length === 0 ? (
           <div className="text-center space-y-6">
-            <h1 className="text-6xl md:text-8xl font-heading tracking-tighter text-premium-text leading-none">All Clear</h1>
-            <p className="text-premium-muted font-sans text-sm tracking-widest uppercase">System Ready / No Pending Tasks</p>
+            <h1 className="text-4xl md:text-8xl font-heading tracking-tighter text-premium-text leading-tight">All Clear</h1>
+            <p className="text-premium-muted font-sans text-xs sm:text-sm tracking-widest uppercase">System Ready / No Pending Tasks</p>
           </div>
         ) : (
           pendingHabits.map(habit => (
-            <div key={habit._id} className="group glass-panel relative flex items-center justify-between p-5 rounded-xl hover:border-premium-muted transition-all duration-300">
-              <button 
-                onClick={() => toggleLog(habit._id, todayStr)}
-                className="absolute -left-6 md:-left-12 h-10 w-10 md:h-12 md:w-12 rounded-full border border-premium-border bg-premium-bg flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 focus:opacity-100 transition-all duration-300 hover:border-premium-text hover:bg-premium-text hover:text-black cursor-pointer z-20"
-                aria-label={`Complete ${habit.title}`}
-              >
-                <span className="sr-only">Complete</span>
-                ✓
-              </button>
-              
-              <h2 className="text-xl md:text-2xl font-sans font-medium tracking-tight text-premium-text">{habit.title}</h2>
+            <div key={habit._id} className="group glass-panel relative flex items-center justify-between p-4 sm:p-5 rounded-xl hover:border-premium-muted transition-all duration-300 gap-3">
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => toggleLog(habit._id, todayStr)}
+                  className="h-8 w-8 sm:h-10 sm:w-10 rounded-full border border-premium-border bg-premium-bg flex items-center justify-center transition-all duration-300 hover:border-premium-text hover:bg-premium-text hover:text-black cursor-pointer flex-shrink-0"
+                  aria-label={`Complete ${habit.title}`}
+                >
+                  ✓
+                </button>
+                <h2 className="text-base sm:text-xl font-sans font-medium tracking-tight text-premium-text">{habit.title}</h2>
+              </div>
               
               {habit.type === 'timer' && (
                 <div className="flex items-center gap-4">
                   {activeTimer === habit._id ? (
                     <button 
                       onClick={stopTimer}
-                      className="flex items-center gap-3 text-xl font-mono text-premium-text"
+                      className="flex items-center gap-3 text-base sm:text-xl font-mono text-premium-text"
                     >
                       <span>{formatTime(timeRemaining)}</span>
-                      <Square size={20} className="opacity-50" />
+                      <Square size={18} className="opacity-50" />
                     </button>
                   ) : (
                     <button 
                       onClick={() => enterUltraFocus(habit._id, habit.targetTimeMinutes || 25)}
-                      className="flex items-center gap-2 px-4 py-2 rounded-full border border-premium-border text-premium-text hover:bg-premium-text hover:text-black transition-all uppercase tracking-widest font-sans text-xs font-medium"
+                      className="flex items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-premium-border text-premium-text hover:bg-premium-text hover:text-black transition-all uppercase tracking-widest font-sans text-[10px] sm:text-xs font-medium whitespace-nowrap"
                     >
-                      <Maximize size={14} />
+                      <Maximize size={12} />
                       Focus ({habit.targetTimeMinutes || 25}m)
                     </button>
                   )}
@@ -204,7 +204,7 @@ export default function Focus() {
         )}
       </div>
 
-      <div className="absolute bottom-8 text-premium-muted opacity-50 text-xs font-sans tracking-wide flex gap-8 z-10">
+      <div className="mt-12 text-premium-muted opacity-50 text-xs font-sans tracking-wide flex gap-8 z-10">
         <button onClick={() => setIsCommandPaletteOpen(true)} className="hover:text-premium-text transition-colors">
           Press <kbd className="font-mono bg-premium-panel border border-premium-border px-2 py-0.5 rounded mx-1 text-premium-muted">Ctrl+K</kbd> to navigate
         </button>

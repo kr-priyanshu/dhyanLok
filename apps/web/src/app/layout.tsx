@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono, Space_Grotesk, Playfair_Display, Fraunces } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -29,6 +29,13 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -47,7 +54,7 @@ export default function RootLayout({
             <NavRail />
             <CloudSyncProvider />
             
-            <main className="flex-1 w-full max-w-5xl mx-auto px-6 pt-8 pb-24 md:pb-8 md:pl-24 transition-all duration-300">
+            <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-24 md:pb-8 md:pl-24 transition-all duration-300 overflow-x-hidden">
               {children}
             </main>
           </AuthGuard>

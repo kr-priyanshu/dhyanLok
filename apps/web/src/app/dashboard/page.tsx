@@ -141,9 +141,9 @@ export default function Dashboard() {
     >
       {/* Feature tour — self-gates via hasCompletedTour, shows only once */}
       <FeatureTour />
-      <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-premium-border pb-8">
+      <header className="flex flex-row justify-between items-center md:items-end gap-4 border-b border-premium-border pb-6 sm:pb-8">
         <div>
-          <h1 className="text-5xl md:text-7xl font-heading tracking-tighter mb-4 text-premium-text leading-none capitalize">
+          <h1 className="text-3xl sm:text-5xl md:text-7xl font-heading tracking-tighter mb-2 sm:mb-4 text-premium-text leading-tight capitalize break-words">
             {username ? `Welcome, ${username}` : 'Dashboard'}
           </h1>
           <div className="flex items-center gap-4">

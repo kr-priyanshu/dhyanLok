@@ -198,9 +198,9 @@ export default function Notebook() {
   });
 
   return (
-    <div className="flex flex-col mt-12 animate-in fade-in duration-700">
-      <header className="mb-16 border-b border-premium-border pb-8">
-        <h1 className="text-5xl md:text-7xl font-heading tracking-tighter mb-4 text-premium-text leading-none">Notebook</h1>
+    <div className="flex flex-col mt-4 sm:mt-12 animate-in fade-in duration-700">
+      <header className="mb-8 sm:mb-16 border-b border-premium-border pb-6 sm:pb-8">
+        <h1 className="text-3xl sm:text-5xl md:text-7xl font-heading tracking-tighter mb-4 text-premium-text leading-tight">Notebook</h1>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <p className="text-premium-muted font-sans text-sm tracking-widest uppercase">
             {offsetDays === 0 ? "Last 15 Days" : `Days ${offsetDays + 1} - ${offsetDays + 15} ago`}

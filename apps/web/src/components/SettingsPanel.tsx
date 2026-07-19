@@ -83,7 +83,7 @@ export default function SettingsPanel() {
       {isOpen && (
         <>
           <div className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[200]" onClick={() => setIsOpen(false)} />
-          <div role="dialog" aria-modal="true" aria-label="Appearance settings" className="fixed inset-y-0 right-0 w-80 glass-panel border-l z-[210] p-6 flex flex-col gap-8 shadow-2xl animate-in slide-in-from-right duration-300">
+          <div role="dialog" aria-modal="true" aria-label="Appearance settings" className="fixed inset-y-0 right-0 w-full max-w-xs sm:w-80 glass-panel border-l z-[210] p-5 sm:p-6 flex flex-col gap-6 sm:gap-8 shadow-2xl animate-in slide-in-from-right duration-300">
             <div className="flex justify-between items-center">
               <h2 className="text-2xl font-heading font-medium tracking-tight">Appearance</h2>
               <button onClick={() => setIsOpen(false)} className="opacity-50 hover:opacity-100" aria-label="Close settings">
