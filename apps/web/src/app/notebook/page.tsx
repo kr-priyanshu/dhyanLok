@@ -79,41 +79,58 @@ export default function Notebook() {
         if (e.data.size > 0) audioChunksRef.current.push(e.data);
       };
 
+      mediaRecorder.onstart = () => {
+        setIsRecording(true);
+      };
+
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const audioBlob = new Blob(audioChunksRef.current, { type: mediaRecorder.mimeType || 'audio/webm' });
         await idbSet(`audio_${selectedDateStr}`, audioBlob);
         setLocalAudioURL(URL.createObjectURL(audioBlob));
+        
+        // Transcribe with Gemini Native Audio Multimodal
+        const geminiApiKey = useAuthStore.getState().geminiApiKey;
+        if (geminiApiKey && audioBlob.size > 0) {
+           const reader = new FileReader();
+           reader.onloadend = async () => {
+             const base64Data = (reader.result as string).split(',')[1];
+             try {
+                setIsDictating(true); // Re-using state to mean "transcribing"
+                const ai = new GoogleGenAI({ apiKey: geminiApiKey });
+                const response = await ai.models.generateContent({
+                  model: 'gemini-3.1-flash-lite',
+                  contents: [
+                    {
+                      role: 'user',
+                      parts: [
+                        { text: "Transcribe this audio dictated by the user exactly as spoken. Do not add conversational filler. If you cannot hear anything, output '[Silence]'." },
+                        {
+                          inlineData: {
+                            data: base64Data,
+                            mimeType: mediaRecorder.mimeType || 'audio/webm'
+                          }
+                        }
+                      ]
+                    }
+                  ] as any
+                });
+                
+                if (response.text && response.text.trim() !== "[Silence]") {
+                  let existing = useHabitStore.getState().transcripts[selectedDateStr] || "";
+                  if (existing.trim().length > 0) existing += "\n\n";
+                  useHabitStore.getState().setTranscript(selectedDateStr, existing + response.text.trim());
+                }
+             } catch (e) {
+                console.error("Transcription failed", e);
+             } finally {
+                setIsDictating(false);
+             }
+           };
+           reader.readAsDataURL(audioBlob);
+        }
       };
 
       mediaRecorder.start();
-      setIsRecording(true);
-
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        const recognition = new SpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true;
-        
-        let finalTranscript = transcripts[selectedDateStr] || "";
-        if (finalTranscript.trim().length > 0) finalTranscript += "\n\n";
-        
-        recognition.onresult = (e: any) => {
-          let currentFinal = finalTranscript;
-          for (let i = e.resultIndex; i < e.results.length; i++) {
-            if (e.results[i].isFinal) {
-              finalTranscript += e.results[i][0].transcript + " ";
-              currentFinal = finalTranscript;
-            } else {
-               currentFinal += e.results[i][0].transcript;
-            }
-          }
-          setTranscript(selectedDateStr, currentFinal);
-        };
-        
-        recognitionRef.current = recognition;
-        recognition.start();
-        setIsDictating(true);
-      }
     } catch (err) {
       console.error("Mic access denied or error", err);
       alert("Could not access microphone.");
@@ -125,10 +142,6 @@ export default function Notebook() {
       mediaRecorderRef.current.stop();
       mediaRecorderRef.current.stream.getTracks().forEach(t => t.stop());
       setIsRecording(false);
-    }
-    if (recognitionRef.current && isDictating) {
-      recognitionRef.current.stop();
-      setIsDictating(false);
     }
   };
 
@@ -370,6 +383,11 @@ export default function Notebook() {
                      >
                        <Mic size={14} /> Record & Dictate
                      </button>
+                   )}
+                   {isDictating && (
+                     <div className="flex items-center gap-2 text-xs font-mono text-[var(--theme-accent)] animate-pulse ml-2">
+                       <Loader2 size={14} className="animate-spin" /> Transcribing with AI...
+                     </div>
                    )}
                    
                    {uploading && (
