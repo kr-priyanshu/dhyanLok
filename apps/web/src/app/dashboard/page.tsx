@@ -157,8 +157,8 @@ export default function Dashboard() {
             </button>
           </div>
         </div>
-        <div data-tour="dashboard-progress" className="hidden md:block">
-           <ProgressRing progress={progress} radius={40} stroke={3} />
+        <div data-tour="dashboard-progress" className="block">
+           <ProgressRing progress={progress} radius={36} stroke={3} />
         </div>
       </header>
 

@@ -75,7 +75,7 @@ export default function SettingsPanel() {
         data-tour="settings"
         onClick={() => setIsOpen(true)}
         aria-label="Open appearance settings"
-        className="fixed bottom-6 right-6 h-12 w-12 rounded-full glass-panel flex items-center justify-center text-[var(--theme-text)] opacity-40 hover:opacity-100 transition-opacity z-[150]"
+        className="fixed top-4 right-4 md:top-auto md:bottom-6 md:right-6 h-10 w-10 md:h-12 md:w-12 rounded-full glass-panel flex items-center justify-center text-[var(--theme-text)] opacity-70 md:opacity-40 hover:opacity-100 transition-opacity z-[150] shadow-lg"
       >
         <Settings size={20} />
       </button>

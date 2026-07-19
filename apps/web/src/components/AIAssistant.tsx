@@ -228,9 +228,9 @@ export default function AIAssistant() {
         data-tour="ai-assistant"
         onClick={handleOpen}
         aria-label="Open AI Assistant"
-        className="fixed bottom-24 right-6 z-50 p-4 rounded-full bg-premium-text text-black shadow-2xl hover:scale-105 transition-transform group"
+        className="fixed bottom-20 right-4 md:bottom-24 md:right-6 z-[90] p-3.5 md:p-4 rounded-full bg-premium-text text-black shadow-2xl hover:scale-105 transition-transform group"
       >
-        <Sparkles size={24} className="group-hover:animate-pulse" />
+        <Sparkles size={22} className="group-hover:animate-pulse" />
       </button>
 
       {/* Modal */}
@@ -242,7 +242,7 @@ export default function AIAssistant() {
             exit={{ opacity: 0, y: 50, scale: 0.95 }}
             role="dialog"
             aria-label="AI Assistant"
-            className="fixed bottom-40 right-6 z-50 w-80 sm:w-96 glass-panel rounded-2xl shadow-2xl p-6 ring-1 ring-premium-border"
+            className="fixed bottom-36 left-4 right-4 md:left-auto md:right-6 md:w-96 z-[120] glass-panel rounded-2xl shadow-2xl p-5 md:p-6 ring-1 ring-premium-border"
           >
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-heading tracking-tight flex items-center gap-2 text-premium-text">

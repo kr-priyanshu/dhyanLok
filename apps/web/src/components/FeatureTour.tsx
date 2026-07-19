@@ -100,10 +100,15 @@ export default function FeatureTour() {
   const measureTarget = useCallback(() => {
     if (!visible) return;
     const current = STEPS[step];
-    const el = document.querySelector(`[data-tour="${current.target}"]`);
-    if (el) {
-      setTargetRect(el.getBoundingClientRect());
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    const elements = Array.from(document.querySelectorAll(`[data-tour="${current.target}"]`));
+    const visibleEl = elements.find((el) => {
+      const rect = el.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    });
+
+    if (visibleEl) {
+      setTargetRect(visibleEl.getBoundingClientRect());
+      visibleEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {
       setTargetRect(null);
     }
@@ -160,50 +165,49 @@ export default function FeatureTour() {
   const Icon = current.icon;
   const isLast = step === STEPS.length - 1;
 
-  // Calculate popover position
-  let popoverStyle: React.CSSProperties = {
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)"
-  };
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
 
-  if (targetRect) {
-    const gap = 24;
-    const isMobile = window.innerWidth < 768;
-    
-    if (isMobile) {
-      popoverStyle = { 
-        top: undefined, 
-        bottom: 24, 
-        left: "50%", 
-        right: undefined, 
+  // Calculate popover position
+  let popoverStyle: React.CSSProperties = isMobile
+    ? {
+        top: undefined,
+        bottom: 84,
+        left: "50%",
+        right: undefined,
         transform: "translateX(-50%)",
-        width: "calc(100vw - 48px)"
+        width: "calc(100vw - 32px)",
+        maxWidth: "380px"
+      }
+    : {
+        top: "50%",
+        left: "50%",
+        transform: "translate(-50%, -50%)"
       };
-    } else {
-      switch (current.position) {
-        case "right":
-          popoverStyle = { top: targetRect.top + targetRect.height / 2, left: targetRect.right + gap, transform: "translateY(-50%)" };
-          break;
-        case "left":
-          popoverStyle = { top: targetRect.top + targetRect.height / 2, right: window.innerWidth - targetRect.left + gap, transform: "translateY(-50%)" };
-          break;
-        case "bottom":
-          popoverStyle = { top: targetRect.bottom + gap, left: targetRect.left + targetRect.width / 2, transform: "translateX(-50%)" };
-          break;
-        case "top":
-          popoverStyle = { bottom: window.innerHeight - targetRect.top + gap, left: targetRect.left + targetRect.width / 2, transform: "translateX(-50%)" };
-          break;
-        case "top-left":
-          popoverStyle = { bottom: window.innerHeight - targetRect.top + gap, right: window.innerWidth - targetRect.right, transform: "none" };
-          break;
-      }
-      
-      // Prevent clipping off screen (basic boundaries)
-      if (typeof popoverStyle.left === 'number' && popoverStyle.left > window.innerWidth - 320) {
-        popoverStyle.left = window.innerWidth - 340;
-        popoverStyle.transform = "none";
-      }
+
+  if (targetRect && !isMobile) {
+    const gap = 24;
+    switch (current.position) {
+      case "right":
+        popoverStyle = { top: targetRect.top + targetRect.height / 2, left: targetRect.right + gap, transform: "translateY(-50%)" };
+        break;
+      case "left":
+        popoverStyle = { top: targetRect.top + targetRect.height / 2, right: window.innerWidth - targetRect.left + gap, transform: "translateY(-50%)" };
+        break;
+      case "bottom":
+        popoverStyle = { top: targetRect.bottom + gap, left: targetRect.left + targetRect.width / 2, transform: "translateX(-50%)" };
+        break;
+      case "top":
+        popoverStyle = { bottom: window.innerHeight - targetRect.top + gap, left: targetRect.left + targetRect.width / 2, transform: "translateX(-50%)" };
+        break;
+      case "top-left":
+        popoverStyle = { bottom: window.innerHeight - targetRect.top + gap, right: window.innerWidth - targetRect.right, transform: "none" };
+        break;
+    }
+    
+    // Prevent clipping off screen (basic boundaries)
+    if (typeof popoverStyle.left === 'number' && popoverStyle.left > window.innerWidth - 320) {
+      popoverStyle.left = window.innerWidth - 340;
+      popoverStyle.transform = "none";
     }
   }
 

@@ -45,7 +45,7 @@ export default function NavRail() {
       </nav>
 
       {/* Mobile Bottom Tab Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-[100] border-t border-premium-border bg-[var(--theme-bg)]/90 backdrop-blur-lg" aria-label="Main navigation">
+      <nav data-tour="nav" className="md:hidden fixed bottom-0 left-0 right-0 z-[100] border-t border-premium-border bg-[var(--theme-bg)]/90 backdrop-blur-lg" aria-label="Main navigation">
         <div className="flex items-center justify-around h-16">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -56,6 +56,7 @@ export default function NavRail() {
                 href={item.href}
                 aria-label={item.label}
                 aria-current={isActive ? "page" : undefined}
+                data-tour={`nav-${item.label.toLowerCase()}`}
                 className={`flex flex-col items-center gap-1 transition-colors ${
                   isActive ? "text-premium-text" : "text-premium-muted"
                 }`}
